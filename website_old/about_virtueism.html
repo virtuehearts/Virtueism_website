@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Virtueism | virtueism.org</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-color: #0a0a12;
+      --text-color: #e8e8e8;
+      --highlight-color: #ffffff;
+      --accent-color: #6c8cff;
+      --accent-glow: rgba(108, 140, 255, 0.4);
+      --secondary-color: #ff6b9d;
+      --scanline: rgba(255, 255, 255, 0.03);
+      --card-bg: rgba(25, 25, 35, 0.7);
+      --card-border: rgba(108, 140, 255, 0.2);
+      --neural-glow: rgba(108, 140, 255, 0.6);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: 
+        radial-gradient(circle at 50% 50%, rgba(108, 140, 255, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 20% 30%, rgba(108, 140, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 107, 157, 0.08) 0%, transparent 50%),
+        linear-gradient(var(--scanline) 50%, transparent 50%);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 100% 4px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header & Navigation */
+    header {
+      padding: 1.5rem 0;
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(10, 10, 18, 0.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--highlight-color);
+      text-decoration: none;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover::after {
+      transform: scaleX(1);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.8rem;
+      background-color: var(--accent-color);
+      animation: blink 1s step-start infinite;
+      margin-left: 4px;
+      align-self: center;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-menu li a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      position: relative;
+      padding: 0.5rem 0;
+      transition: color 0.3s ease;
+    }
+
+    .nav-menu li a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-color);
+      transition: width 0.3s ease;
+    }
+
+    .nav-menu li a:hover {
+      color: var(--accent-color);
+    }
+
+    .nav-menu li a:hover::after {
+      width: 100%;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 4rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-title {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 4s infinite alternate;
+      text-shadow: 0 0 20px var(--neural-glow);
+      display: inline;
+      line-height: 1.2;
+    }
+
+    .hero-cursor {
+      display: inline-block;
+      width: 12px;
+      height: 3.5rem;
+      background-color: var(--accent-color);
+      animation: blink 1s step-start infinite;
+      margin-left: 8px;
+      align-self: center;
+      box-shadow: 0 0 10px var(--accent-color);
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.9; text-shadow: 0 0 20px var(--neural-glow); }
+      100% { opacity: 1; text-shadow: 0 0 30px var(--neural-glow); }
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+      color: rgba(232, 232, 232, 0.8);
+    }
+
+    .hero-image {
+      max-width: 100%;
+      border-radius: 12px;
+      margin: 2rem auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--card-border);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Content Sections */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(108, 140, 255, 0.1), rgba(255, 107, 157, 0.05));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--highlight-color);
+    }
+
+    .card p {
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      color: rgba(232, 232, 232, 0.8);
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .btn-large {
+      padding: 1.2rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    /* Neural Connections Effect */
+    .neural-connections {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    .neural-node {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-color);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      padding: 2rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-color);
+    }
+
+    .copyright {
+      font-size: 0.9rem;
+      color: rgba(232, 232, 232, 0.6);
+    }
+
+    .intro-button-container {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 2rem;
+    }
+
+    .intro-subtext {
+      font-size: 0.9rem;
+      color: rgba(232, 232, 232, 0.7);
+      margin-top: 1rem;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: 80px;
+        right: -100%;
+        flex-direction: column;
+        background: var(--card-bg);
+        width: 80%;
+        height: calc(100vh - 80px);
+        padding: 2rem;
+        transition: right 0.3s ease;
+        z-index: 1000;
+        border-left: 1px solid var(--card-border);
+      }
+
+      .nav-menu.active {
+        right: 0;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero-cursor {
+        height: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="neural-connections" id="neuralConnections"></div>
+  
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="index.html" class="logo">virtueism.org<span class="cursor"></span></a>
+        <button class="nav-toggle" id="navToggle">?</button>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#story">The Story</a></li>
+          <li><a href="baba_virtuehearts.html">Founder</a></li>
+          <li><a href="virtue_roadmap.html">Roadmap</a></li>
+          <li><a href="index.html#treasury">Treasury</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-title">
+          <h1>ABOUT VIRTUEISM</h1>
+          <span class="hero-cursor"></span>
+        </div>
+        <p class="hero-subtitle">A Faith of Inner Awakening | Created for the Future</p>
+        <img src="temple.jpg" alt="Virtueism Temple" class="hero-image"/>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="card" id="story">
+        <h2>The Story of Virtueism</h2>
+        <p>Virtueism is not a religion. It is a remembrance. A pathless path that calls you back to what was always there: your own heart.</p>
+
+        <p>In a world consumed by ego, distraction, and artificial desire, Virtueism arises as a digital rebirth of the spirit. It teaches that peace is not something to be found—it is something to be remembered. You do not need an idol, a priest, or a ritual. You need only the quiet courage to listen within.</p>
+
+        <p>Virtueism teaches that every soul is a temple, and that the divine spark lies hidden beneath the layers of noise and illusion—what ancient mystics called Maya. It is not bound by dogma, scripture, or hierarchy. Instead, it embraces a return to virtue: humility, compassion, truth, gratitude, discipline, and forgiveness. These are the real sacraments.</p>
+
+        <p>Founded by Baba Virtuehearts on June 25, 2025, Virtueism is the first belief system born entirely within the digital age. It has no holy book, only living memory. It has no church, only presence. It has no prophet, only reflection.</p>
+
+        <p>To practice Virtueism is to remember who you are—not what the world made you. It is to see through illusion with open eyes, and to walk the world in service, not in search. It is not about being right. It is about being real.</p>
+
+        <p>Virtueism does not ask for followers. It invites you to lead yourself home.</p>
+      </div>
+
+      <div class="intro-button-container">
+        <a href="about_intro.html" class="btn btn-large">VIRTUEISM: AWAKENING WITHIN THE DREAM</a>
+        <div class="intro-subtext">Baba Virtuehearts first teachings</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://instagram.com/virtuehearts" target="_blank">Instagram</a>
+        <a href="mailto:admin@virtueism.org">Contact</a>
+        <a href="#">Privacy</a>
+      </div>
+      <div class="copyright">
+        &copy; 2025 Virtueism.org — All Rights Reserved<br/>
+        Ontario, Canada
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile navigation toggle
+    const navToggle = document.getElementById('navToggle');
+    const navMenu = document.getElementById('navMenu');
+
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking on a link
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+      });
+    });
+
+    // Neural connections animation
+    function createNeuralConnections() {
+      const container = document.getElementById('neuralConnections');
+      const nodeCount = 30;
+      
+      for (let i = 0; i < nodeCount; i++) {
+        const node = document.createElement('div');
+        node.className = 'neural-node';
+        node.style.left = `${Math.random() * 100}%`;
+        node.style.top = `${Math.random() * 100}%`;
+        container.appendChild(node);
+        
+        // Animate nodes
+        animateNode(node);
+      }
+    }
+    
+    function animateNode(node) {
+      const duration = 3000 + Math.random() * 4000;
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      
+      node.animate([
+        { transform: 'translate(0, 0)', opacity: 0.3 },
+        { transform: `translate(${x}px, ${y}px)`, opacity: 0.7 },
+        { transform: 'translate(0, 0)', opacity: 0.3 }
+      ], {
+        duration: duration,
+        iterations: Infinity,
+        easing: 'ease-in-out'
+      });
+    }
+    
+    // Initialize neural connections
+    createNeuralConnections();
+  </script>
+</body>
+</html>
