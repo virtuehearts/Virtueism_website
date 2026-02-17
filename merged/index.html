@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtueism Reiki • Learn with Baba Virtuehearts</title>
+  <meta name="description" content="A full HTML version of the Virtueism redesign focused on Reiki training with Baba Virtuehearts and the ReikiTraining app." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <header class="site-header" id="top">
+    <div class="container nav-row">
+      <a class="brand" href="#top">Virtueism Reiki</a>
+      <button class="menu-btn" aria-label="Toggle menu">☰</button>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#training">Training</a>
+        <a href="#mya">Mya</a>
+        <a href="#curriculum">Curriculum</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn small" href="https://github.com/virtuehearts/ReikiTraining" target="_blank" rel="noopener noreferrer">View App Repo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-content">
+        <p class="eyebrow">Ancient Reiki Wisdom • Modern Training Platform</p>
+        <h1>Learn Reiki with Baba Virtuehearts.</h1>
+        <p class="lead">This static HTML build mirrors the new Virtueism design while focusing on Reiki students, live mentorship, and the upcoming integrated training experience.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#training">Explore Training</a>
+          <a class="btn ghost" href="https://github.com/virtuehearts/ReikiTraining" target="_blank" rel="noopener noreferrer">Open ReikiTraining</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container two-col card">
+        <div>
+          <h2>About Baba Virtuehearts</h2>
+          <p>Baba Virtuehearts guides students through practical Reiki healing rooted in compassion, energetic alignment, and spiritual discipline.</p>
+          <p>The goal is simple: help sincere seekers build a grounded healing practice and serve their families and communities with integrity.</p>
+        </div>
+        <ul class="pill-list">
+          <li>1:1 & group mentorship</li>
+          <li>Beginner to practitioner pathway</li>
+          <li>Spiritual growth + service orientation</li>
+          <li>Global, online-friendly learning</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="training" class="section">
+      <div class="container">
+        <h2>Training Experience</h2>
+        <div class="grid-3">
+          <article class="card">
+            <h3>Step-by-step modules</h3>
+            <p>Structured sessions with clear progression from Reiki foundations to advanced energetic practices.</p>
+          </article>
+          <article class="card">
+            <h3>Practice assignments</h3>
+            <p>Hands-on exercises to strengthen sensitivity, intention, and confidence as a healer.</p>
+          </article>
+          <article class="card">
+            <h3>Community support</h3>
+            <p>Learn alongside fellow students committed to healing, inner transformation, and sacred discipline.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="mya" class="section">
+      <div class="container card">
+        <h2>Mya: your spiritual learning companion</h2>
+        <p>Mya is planned as your bridge between website guidance and app-based study, helping students revisit teachings, stay consistent, and deepen understanding between live sessions.</p>
+      </div>
+    </section>
+
+    <section id="curriculum" class="section">
+      <div class="container">
+        <h2>Sample Learning Path</h2>
+        <ol class="timeline">
+          <li><strong>Initiation:</strong> Reiki principles, history, and healer mindset.</li>
+          <li><strong>Energy Awareness:</strong> sensing, grounding, and channeling practice.</li>
+          <li><strong>Healing Method:</strong> self-healing and guided client sessions.</li>
+          <li><strong>Integration:</strong> ethics, consistency, and service-focused growth.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container">
+        <h2>FAQ</h2>
+        <details class="card">
+          <summary>Is this production-ready as a static front end?</summary>
+          <p>Yes. This folder provides a plain HTML/CSS/JS website that can be hosted directly and later wired to the ReikiTraining backend.</p>
+        </details>
+        <details class="card">
+          <summary>Can this be merged with the training app on one server?</summary>
+          <p>Yes. The content and CTAs are intentionally aligned so this can be used as the public marketing layer with the training app as the authenticated experience.</p>
+        </details>
+        <details class="card">
+          <summary>How do users continue into the app?</summary>
+          <p>Use the ReikiTraining links as placeholders now, then swap them to your deployed app routes once integration is complete.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="section footer">
+    <div class="container footer-row">
+      <p>© <span id="year"></span> Virtueism Reiki • Built for unified website + training deployment.</p>
+      <a href="mailto:admin@virtueism.org">admin@virtueism.org</a>
+    </div>
+  </footer>
+
+  <script src="./script.js"></script>
+</body>
+</html>
