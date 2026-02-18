@@ -8,23 +8,19 @@ import { CheckCircle, ChevronRight, BookOpen, Wind, Star } from "lucide-react";
 
 interface DailyCardProps {
   day: number;
+  isCompleted: boolean;
   onComplete: (completedAt: string) => void;
 }
 
-export default function DailyCard({ day, onComplete }: DailyCardProps) {
+export default function DailyCard({ day, isCompleted, onComplete }: DailyCardProps) {
   const content = dailyContent[day];
   const [step, setStep] = useState(1); // 1: Lesson, 2: Exercise, 3: Ritual, 4: Quiz/Reflection
   const [reflection, setReflection] = useState("");
-  const [activeQuiz, setActiveQuiz] = useState(content?.quiz);
   const [saving, setSaving] = useState(false);
-  const [generatingQuiz, setGeneratingQuiz] = useState(false);
-  const [quizError, setQuizError] = useState("");
   const [completionError, setCompletionError] = useState("");
 
   useEffect(() => {
-    setActiveQuiz(content?.quiz);
     setStep(1);
-    setQuizError("");
     setCompletionError("");
   }, [day, content]);
 
@@ -60,6 +56,18 @@ export default function DailyCard({ day, onComplete }: DailyCardProps) {
   };
 
   if (!content) return null;
+
+  if (isCompleted) {
+    return (
+      <div className="bg-background-alt rounded-3xl border border-primary/20 shadow-2xl overflow-hidden max-w-4xl mx-auto w-full p-10 text-center">
+        <p className="text-accent uppercase tracking-[0.3em] font-bold text-xs mb-3">Sacred Training</p>
+        <h3 className="text-3xl font-serif text-foreground mb-3">Day {day} Complete</h3>
+        <p className="text-foreground-muted">
+          You have already completed this lesson and quiz. Return after midnight local time to unlock your next teaching.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background-alt rounded-3xl border border-primary/20 shadow-2xl overflow-hidden max-w-4xl mx-auto w-full">
@@ -137,47 +145,7 @@ export default function DailyCard({ day, onComplete }: DailyCardProps) {
             </div>
 
             <div className="space-y-4">
-              <QuizComponent key={activeQuiz === content.quiz ? 'static' : 'dynamic'} quiz={activeQuiz} onComplete={() => {}} />
-
-              {activeQuiz === content.quiz && (
-                <>
-                  <p className="text-center text-xs text-foreground-muted">or</p>
-                  <button
-                    onClick={async () => {
-                      setGeneratingQuiz(true);
-                      setQuizError("");
-                      try {
-                        const res = await fetch("/api/quiz", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ virtue: content.virtue, day }),
-                        });
-                        if (!res.ok) {
-                          const errorPayload = await res.json().catch(() => ({}));
-                          setQuizError(errorPayload?.error || "Unable to generate wisdom check right now. Please try again.");
-                          return;
-                        }
-
-                        const dynamicQuiz = await res.json();
-                        if (Array.isArray(dynamicQuiz) && dynamicQuiz.length > 0) {
-                          setActiveQuiz(dynamicQuiz);
-                        } else {
-                          setQuizError("Received an invalid wisdom check. Please try again.");
-                        }
-                      } catch (e) {
-                        setQuizError("Connection issue while generating wisdom check. Please try again.");
-                      } finally {
-                        setGeneratingQuiz(false);
-                      }
-                    }}
-                    disabled={generatingQuiz}
-                    className="w-full py-2 border border-accent/20 text-accent rounded-lg text-sm hover:bg-accent/5 transition-all disabled:opacity-50"
-                  >
-                    {generatingQuiz ? "Generating..." : "Generate Personalized Wisdom Check (AI)"}
-                  </button>
-                  {quizError && <p className="text-xs text-red-400 text-center">{quizError}</p>}
-                </>
-              )}
+              <QuizComponent quiz={content.quiz} onComplete={() => {}} />
             </div>
 
             <div className="pt-8">

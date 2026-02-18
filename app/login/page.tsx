@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense, useEffect } from "react";
-import { signIn, signOut, getProviders, getSession } from "next-auth/react";
+import { signIn, getProviders } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -50,11 +50,6 @@ function LoginContent() {
     setLoading(true);
 
     try {
-      const existingSession = await getSession();
-      if (existingSession) {
-        await signOut({ redirect: false });
-      }
-
       const res = await signIn("credentials", {
         email,
         password,
