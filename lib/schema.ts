@@ -128,10 +128,28 @@ export const reflections = sqliteTable('reflection', {
   unq: unique().on(t.userId, t.day),
 }));
 
+export const lessonSessions = sqliteTable('lessonSession', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  day: integer('day').notNull(),
+  virtue: text('virtue').notNull(),
+  preLessonText: text('preLessonText').notNull(),
+  quiz: text('quiz').notNull(),
+  answers: text('answers').default('[]').notNull(),
+  score: integer('score').default(0).notNull(),
+  totalQuestions: integer('totalQuestions').default(0).notNull(),
+  submittedAt: integer('submittedAt', { mode: 'timestamp' }),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
+}, (t) => ({
+  unq: unique().on(t.userId, t.day),
+}));
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   intake: one(intakes),
   progress: many(progress),
   reflections: many(reflections),
+  lessonSessions: many(lessonSessions),
   chatMessages: many(chatMessages),
   userMemories: many(userMemories),
   authoredCoreMemories: many(coreMemories),
@@ -213,6 +231,13 @@ export const progressRelations = relations(progress, ({ one }) => ({
 export const reflectionsRelations = relations(reflections, ({ one }) => ({
   user: one(users, {
     fields: [reflections.userId],
+    references: [users.id],
+  }),
+}));
+
+export const lessonSessionsRelations = relations(lessonSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [lessonSessions.userId],
     references: [users.id],
   }),
 }));

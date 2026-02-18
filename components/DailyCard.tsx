@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { dailyContent } from "@/lib/content";
 import RitualViewer from "./RitualViewer";
 import QuizComponent from "./QuizComponent";
-import { CheckCircle, ChevronRight, BookOpen, Wind, Star } from "lucide-react";
+import { CheckCircle, ChevronRight, BookOpen, Wind, Star, X } from "lucide-react";
 
 interface DailyCardProps {
   day: number;
@@ -12,23 +12,107 @@ interface DailyCardProps {
   onComplete: (completedAt: string) => void;
 }
 
+interface GeneratedQuizItem {
+  question: string;
+  options: string[];
+  correct: number;
+}
+
 export default function DailyCard({ day, isCompleted, onComplete }: DailyCardProps) {
   const content = dailyContent[day];
-  const [step, setStep] = useState(1); // 1: Lesson, 2: Exercise, 3: Ritual, 4: Quiz/Reflection
+  const [step, setStep] = useState(1);
   const [reflection, setReflection] = useState("");
   const [saving, setSaving] = useState(false);
   const [completionError, setCompletionError] = useState("");
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [quizSessionId, setQuizSessionId] = useState<string | null>(null);
+  const [generatedQuiz, setGeneratedQuiz] = useState<GeneratedQuizItem[]>([]);
+  const [preLessonText, setPreLessonText] = useState("");
+  const [showPreLessonWindow, setShowPreLessonWindow] = useState(false);
+  const [preLessonClosed, setPreLessonClosed] = useState(false);
+  const [loadingGeneratedLesson, setLoadingGeneratedLesson] = useState(false);
 
   useEffect(() => {
     setStep(1);
     setCompletionError("");
+    setQuizPassed(false);
+    setQuizSessionId(null);
+    setGeneratedQuiz([]);
+    setPreLessonText("");
+    setShowPreLessonWindow(false);
+    setPreLessonClosed(false);
   }, [day, content]);
 
+  const generateLessonSession = async () => {
+    setLoadingGeneratedLesson(true);
+    setCompletionError("");
+
+    try {
+      const res = await fetch("/api/lesson-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate",
+          day,
+          virtue: content.virtue,
+        }),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        setCompletionError(payload?.error || "Unable to generate lesson material right now.");
+        return;
+      }
+
+      const payload = await res.json();
+      setQuizSessionId(payload.sessionId);
+      setPreLessonText(payload.preLessonText || "");
+      setGeneratedQuiz(Array.isArray(payload.quiz) ? payload.quiz : []);
+      setShowPreLessonWindow(true);
+      setPreLessonClosed(false);
+      setQuizPassed(false);
+    } catch {
+      setCompletionError("Connection issue while generating lesson material.");
+    } finally {
+      setLoadingGeneratedLesson(false);
+    }
+  };
+
+  const handleQuizCompleted = async ({ answers }: { score: number; totalQuestions: number; answers: number[] }) => {
+    if (!quizSessionId) return;
+
+    try {
+      const res = await fetch("/api/lesson-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit",
+          sessionId: quizSessionId,
+          answers,
+        }),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        setCompletionError(payload?.error || "Could not save quiz answers.");
+        return;
+      }
+
+      setQuizPassed(true);
+    } catch {
+      setCompletionError("Connection issue while submitting quiz answers.");
+    }
+  };
+
   const handleFinish = async () => {
+    if (!quizPassed) {
+      setCompletionError("Please complete the 7-question wisdom quiz before finishing this day.");
+      return;
+    }
+
     setSaving(true);
     setCompletionError("");
     try {
-      // Save reflection and progress
       const res = await fetch("/api/user/complete-day", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,8 +130,8 @@ export default function DailyCard({ day, isCompleted, onComplete }: DailyCardPro
       }
 
       onComplete(new Date().toISOString());
-      setStep(1); // Reset for next day if needed
-    } catch (err) {
+      setStep(1);
+    } catch {
       setCompletionError("Connection issue while completing this lesson. Please try again.");
       console.error("Failed to complete day");
     } finally {
@@ -71,7 +155,35 @@ export default function DailyCard({ day, isCompleted, onComplete }: DailyCardPro
 
   return (
     <div className="bg-background-alt rounded-3xl border border-primary/20 shadow-2xl overflow-hidden max-w-4xl mx-auto w-full">
-      {/* Header */}
+      {showPreLessonWindow && (
+        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm p-4 md:p-8 overflow-y-auto">
+          <div className="max-w-3xl mx-auto bg-background-alt border border-primary/30 rounded-2xl p-6 md:p-8 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-accent font-bold">Pre-lesson transmission</p>
+                <h4 className="text-2xl font-serif text-foreground">Day {day}: {content.virtue}</h4>
+              </div>
+              <button
+                onClick={() => {
+                  setShowPreLessonWindow(false);
+                  setPreLessonClosed(true);
+                }}
+                className="rounded-full border border-primary/30 p-2 text-foreground-muted hover:text-accent"
+                aria-label="Close lesson pre-text"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground-muted bg-background rounded-xl border border-primary/10 p-5">
+              {preLessonText}
+            </div>
+            <p className="text-xs text-foreground-muted mt-4">
+              Once this window is closed, the pre-lesson text is sealed and cannot be reopened for this day.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-gradient-to-r from-primary/40 to-primary-light/40 p-8 border-b border-primary/10">
         <div className="flex justify-between items-center">
           <div>
@@ -144,9 +256,31 @@ export default function DailyCard({ day, isCompleted, onComplete }: DailyCardPro
               <h4 className="text-xl font-serif uppercase tracking-wider">Reflection & Integration</h4>
             </div>
 
-            <div className="space-y-4">
-              <QuizComponent quiz={content.quiz} onComplete={() => {}} />
-            </div>
+            {!generatedQuiz.length && !preLessonClosed && (
+              <button
+                onClick={generateLessonSession}
+                disabled={loadingGeneratedLesson}
+                className="w-full rounded-xl border border-primary/20 bg-primary/10 hover:bg-primary/20 px-5 py-4 text-left"
+              >
+                <p className="text-accent font-semibold">{loadingGeneratedLesson ? "Generating sacred study..." : "Generate today’s lesson pre-text + 7 wisdom questions"}</p>
+                <p className="text-xs text-foreground-muted mt-1">This runs 4 deep lesson generations and 1 quiz generation to build your full context.</p>
+              </button>
+            )}
+
+            {generatedQuiz.length > 0 && preLessonClosed && (
+              <div className="space-y-4">
+                <p className="text-xs uppercase tracking-wider text-foreground-muted">Quiz unlocked</p>
+                <QuizComponent quiz={generatedQuiz} onComplete={handleQuizCompleted} />
+              </div>
+            )}
+
+            {generatedQuiz.length > 0 && !preLessonClosed && (
+              <p className="text-sm text-foreground-muted">Close the pre-lesson window to begin the quiz.</p>
+            )}
+
+            {quizPassed && (
+              <p className="text-sm text-green-400">Quiz saved. Your answers and score are now available to admin review.</p>
+            )}
 
             <div className="pt-8">
               <label className="block text-sm text-foreground-muted mb-3 italic">What insights did you gain today?</label>

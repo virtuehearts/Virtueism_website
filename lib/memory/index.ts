@@ -5,7 +5,7 @@ import { memoryConfig, memoryEvents, memoryItems, users } from "@/lib/schema";
 import { and, asc, desc, eq, gte, inArray, isNull, like, or, sql } from "drizzle-orm";
 
 export type MemoryScope = "user" | "global";
-export type MemoryType = "preference" | "goal" | "progress" | "lesson_issue" | "note";
+export type MemoryType = "preference" | "goal" | "profile" | "progress" | "lesson_issue" | "note";
 export type MemorySource = "chat" | "quiz" | "journal" | "admin";
 
 const DEFAULT_RETENTION_DAYS = 90;
@@ -257,6 +257,38 @@ export async function createInteractionMemories(userId: string, userMessage: str
       content: `User preferred name: ${sanitizeMemoryContent(nameMatch[1])}`,
       tags: ["name", "profile"],
       confidence: 85,
+    });
+  }
+
+
+
+  const hobbyMatch = userMessage.match(/(?:i enjoy|my hobbies are|i like to do|i love)\s+([^.!?]{6,160})/i);
+  if (hobbyMatch?.[1]) {
+    candidates.push({
+      type: "profile",
+      content: `User hobbies/interests: ${sanitizeMemoryContent(hobbyMatch[1])}`,
+      tags: ["hobby", "interest", "profile"],
+      confidence: 78,
+    });
+  }
+
+  const likesMatch = userMessage.match(/(?:i like|i really like|i prefer)\s+([^.!?]{6,160})/i);
+  if (likesMatch?.[1]) {
+    candidates.push({
+      type: "preference",
+      content: `User likes: ${sanitizeMemoryContent(likesMatch[1])}`,
+      tags: ["likes", "preference"],
+      confidence: 74,
+    });
+  }
+
+  const dislikesMatch = userMessage.match(/(?:i dislike|i don't like|i hate)\s+([^.!?]{6,160})/i);
+  if (dislikesMatch?.[1]) {
+    candidates.push({
+      type: "preference",
+      content: `User dislikes: ${sanitizeMemoryContent(dislikesMatch[1])}`,
+      tags: ["dislikes", "preference"],
+      confidence: 74,
     });
   }
 

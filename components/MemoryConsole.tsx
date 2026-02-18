@@ -33,6 +33,7 @@ const CATEGORY_CONFIG = [
   { key: "goal", label: "Goals" },
   { key: "preference", label: "Learning style" },
   { key: "progress", label: "Progress" },
+  { key: "profile", label: "Profile" },
   { key: "lesson_issue", label: "Friction" },
 ] as const;
 
@@ -158,6 +159,7 @@ export default function MemoryConsole({
             <option value="goal">Goal</option>
             <option value="preference">Preference</option>
             <option value="progress">Progress</option>
+            <option value="profile">Profile</option>
             <option value="lesson_issue">Lesson issue</option>
             <option value="note">Note</option>
           </select>
