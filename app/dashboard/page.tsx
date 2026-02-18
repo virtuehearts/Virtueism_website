@@ -30,7 +30,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login", redirect: true });
+    await signOut({ redirect: false });
+    window.location.assign("/login");
   };
 
   const highestCompletedDay = progress.length ? Math.max(...progress) : 0;
@@ -156,6 +157,7 @@ export default function DashboardPage() {
 
            <DailyCard
              day={currentDay}
+             isCompleted={progress.includes(currentDay)}
              onComplete={(completedAt) => {
                setLessonLockMessage("");
                const updatedProgress = progress.includes(currentDay)
@@ -186,6 +188,11 @@ export default function DashboardPage() {
             <button
               key={day}
               onClick={() => {
+                if (progress.includes(day)) {
+                  setLessonLockMessage(`Day ${day} is already completed and locked. Please continue to the next available day.`);
+                  return;
+                }
+
                 if (day > maxUnlockedDay) {
                   setLessonLockMessage(
                     `Please meditate on today's teachings. Day ${maxUnlockedDay + 1} unlocks after midnight local time.`

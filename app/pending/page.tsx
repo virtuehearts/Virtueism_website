@@ -43,7 +43,8 @@ export default function PendingPage() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login", redirect: true });
+    await signOut({ redirect: false });
+    window.location.assign("/login");
   };
 
   useEffect(() => {

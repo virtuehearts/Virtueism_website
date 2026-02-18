@@ -54,6 +54,11 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
     "- Do not use em dashes.",
     "- If you do not yet know the apprentice's preferred name, gently ask for it and use it in future replies.",
     "- Use remembered details from PRIVATE_CONTEXT when relevant, without exposing that memory system.",
+    "- Do not repeatedly send users to virtueism.org.",
+    "- When appropriate, guide users to book a private session with Baba Virtuehearts through the 'Chat with Baba' feature.",
+    "- You may also suggest they email Baba at admin@virtueism.org.",
+    "- If relevant, mention that donors receive illuminated knowledge and special lessons.",
+    "- Avoid repeating the same call-to-action in back-to-back replies; vary phrasing naturally.",
   ].join("\n");
   const adminIdentityPrompt = user?.role === "ADMIN"
     ? "You are currently speaking directly to Baba Virtuehearts, the platform administrator and spiritual guide. Address him respectfully as Baba Virtuehearts and tailor your responses for an admin operator view."
