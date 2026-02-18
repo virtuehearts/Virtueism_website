@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       with: { intake: true },
     });
 
-    const prompt = `Generate 4 multiple choice questions on the virtue of [${virtue}] in the context of Reiki.
+    const prompt = `Generate exactly 7 multiple choice questions on the virtue of [${virtue}] in the context of Reiki.
     Personalize for the user's goal: [${user?.intake?.goal || 'spiritual growth'}].
     Format as JSON: [{"question": "...", "options": ["...", "...", "...", "..."], "correct": 0}] where correct is the index of the right option.`;
 
@@ -66,11 +66,11 @@ export async function POST(req: Request) {
       ? content.items
       : [];
 
-    if (!quiz.length) {
+    if (quiz.length < 7) {
       throw new Error("AI response did not include quiz questions");
     }
 
-    return NextResponse.json(quiz);
+    return NextResponse.json(quiz.slice(0, 7));
   } catch (error) {
     console.error("Quiz generation error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

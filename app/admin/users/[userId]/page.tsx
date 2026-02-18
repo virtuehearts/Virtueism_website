@@ -9,6 +9,15 @@ import { users } from "@/lib/schema";
 
 const formatDate = (value?: Date | null) => (value ? new Date(value).toLocaleString() : "Not available");
 
+
+const parseJson = <T,>(value: string, fallback: T): T => {
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export default async function AdminUserDetailsPage({ params }: { params: Promise<{ userId: string }> }) {
   const session = await getServerSession(authOptions);
   if (session?.user?.role !== "ADMIN") {
@@ -21,6 +30,7 @@ export default async function AdminUserDetailsPage({ params }: { params: Promise
     where: eq(users.id, userId),
     with: {
       intake: true,
+      lessonSessions: true,
     },
   });
 
@@ -76,6 +86,38 @@ export default async function AdminUserDetailsPage({ params }: { params: Promise
           <p><span className="text-accent/70">Reason for joining:</span> {user.intake?.whyJoined || "Not provided"}</p>
           <p><span className="text-accent/70">Spiritual goal:</span> {user.intake?.goal || "Not provided"}</p>
           <p><span className="text-accent/70">Health concerns:</span> {user.intake?.healthConcerns || "Not provided"}</p>
+        </section>
+
+        <section className="bg-background-alt rounded-2xl border border-primary/20 p-6 space-y-4 text-sm">
+          <h3 className="text-lg font-semibold text-accent">Generated Lesson + Quiz Records</h3>
+          {!user.lessonSessions.length && <p className="text-foreground-muted">No generated lesson sessions yet.</p>}
+          {user.lessonSessions.map((session) => {
+            const quiz = parseJson<Array<{ question: string; options: string[]; correct: number }>>(session.quiz, []);
+            const answers = parseJson<number[]>(session.answers, []);
+            return (
+              <div key={session.id} className="rounded-xl border border-primary/15 p-4 space-y-3">
+                <p><span className="text-accent/70">Day {session.day}:</span> {session.virtue}</p>
+                <p><span className="text-accent/70">Score:</span> {session.score}/{session.totalQuestions}</p>
+                <p><span className="text-accent/70">Submitted:</span> {formatDate(session.submittedAt)}</p>
+                <details>
+                  <summary className="cursor-pointer text-accent/80">View generated pre-lesson text</summary>
+                  <pre className="mt-2 whitespace-pre-wrap text-xs text-foreground-muted bg-background border border-primary/10 rounded-lg p-3">{session.preLessonText}</pre>
+                </details>
+                <details>
+                  <summary className="cursor-pointer text-accent/80">View quiz, chosen answers, and correct answers</summary>
+                  <div className="space-y-2 mt-2">
+                    {quiz.map((item, index) => (
+                      <div key={`${session.id}-${index}`} className="rounded-lg border border-primary/10 p-3">
+                        <p className="font-medium">Q{index + 1}. {item.question}</p>
+                        <p className="text-xs text-foreground-muted">Chosen answer: {typeof answers[index] === "number" ? item.options[answers[index]] || `Option ${answers[index] + 1}` : "No answer"}</p>
+                        <p className="text-xs text-green-400">Correct answer: {item.options[item.correct] || `Option ${item.correct + 1}`}</p>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            );
+          })}
         </section>
 
         <section className="bg-background-alt rounded-2xl border border-primary/20 p-6 space-y-3 text-sm">

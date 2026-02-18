@@ -10,7 +10,7 @@ interface QuizItem {
 
 interface QuizComponentProps {
   quiz: QuizItem[];
-  onComplete: () => void;
+  onComplete: (payload: { score: number; totalQuestions: number; answers: number[] }) => void;
 }
 
 export default function QuizComponent({ quiz, onComplete }: QuizComponentProps) {
@@ -19,11 +19,17 @@ export default function QuizComponent({ quiz, onComplete }: QuizComponentProps) 
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [answers, setAnswers] = useState<number[]>([]);
 
   const handleOptionSelect = (index: number) => {
     if (showFeedback) return;
     setSelectedOption(index);
     setShowFeedback(true);
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[currentQuestion] = index;
+      return next;
+    });
     if (index === quiz[currentQuestion].correct) {
       setScore(score + 1);
     }
@@ -36,7 +42,9 @@ export default function QuizComponent({ quiz, onComplete }: QuizComponentProps) 
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setFinished(true);
-      onComplete();
+      const finalAnswers = answers.slice(0, quiz.length);
+      const finalScore = quiz.reduce((acc, item, index) => (finalAnswers[index] === item.correct ? acc + 1 : acc), 0);
+      onComplete({ score: finalScore, totalQuestions: quiz.length, answers: finalAnswers });
     }
   };
 
