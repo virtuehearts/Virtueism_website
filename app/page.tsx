@@ -22,24 +22,28 @@ const trainingDays = [
 
 const services = [
   {
-    title: "1-on-1 Reiki Sessions with Baba Virtuehearts",
+    title: "Reiki Sessions",
     description:
       "Personalized healing sessions focused on clarity, release, and energetic renewal.",
+    href: "/wellness/reiki-sessions",
   },
   {
-    title: "Oil Massage Therapy",
+    title: "Reiki Classes",
+    description:
+      "Train with Baba Virtuehearts through guided online Reiki class pathways.",
+    href: "/wellness/reiki-classes",
+  },
+  {
+    title: "Massage Therapy",
     description:
       "Relaxing bodywork sessions designed to support deep rest and emotional balance.",
+    href: "/wellness/massage",
   },
   {
-    title: "Online Sessions via WhatsApp",
+    title: "Explore All Wellness",
     description:
-      "Receive guidance and healing remotely when in-person sessions are not possible.",
-  },
-  {
-    title: "In-Person & Outcall in GTA",
-    description:
-      "Based in Scarborough, Ontario with outcall service across the GTA (extra fees apply).",
+      "See all wellness services, class options, and booking details in one place.",
+    href: "/wellness",
   },
 ];
 
@@ -142,8 +146,11 @@ export default function HomePage() {
               {[
                 "Authentic Reiki training guided by Baba Virtuehearts",
                 "Beginner-friendly steps with practical daily rituals",
-                "One place for the public website and the full training platform",
-                "Community support plus future AI and WhatsApp growth",
+                "Guided Reiki Training",
+                "Advanced Training available",
+                "Facebook Community & WhatsApp Group",
+                "Meet others in Virtueism Reiki",
+                "AI assistance & Baba Virtuehearts.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
@@ -208,12 +215,15 @@ export default function HomePage() {
         </section>
 
         <section id="services" className="mx-auto w-full max-w-6xl px-4 py-14">
-          <h2 className="mb-8 text-3xl font-bold md:text-4xl">Healing Services</h2>
+          <h2 className="mb-8 text-3xl font-bold md:text-4xl">Wellness Services</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {services.map((service) => (
               <article key={service.title} className="glass-panel rounded-xl border border-violet-500/20 p-6">
                 <h3 className="mb-2 text-xl font-semibold">{service.title}</h3>
                 <p className="text-violet-100/80">{service.description}</p>
+                <Link href={service.href} className="mt-4 inline-block text-sm text-violet-200 underline underline-offset-4 hover:text-violet-100">
+                  More info
+                </Link>
               </article>
             ))}
           </div>

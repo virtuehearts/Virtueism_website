@@ -30,8 +30,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false });
-    window.location.assign("/login");
+    await signOut({ callbackUrl: "/login" });
   };
 
   const highestCompletedDay = progress.length ? Math.max(...progress) : 0;
@@ -48,6 +47,8 @@ export default function DashboardPage() {
   const maxUnlockedDay = isNextDayLockedUntilMidnight
     ? highestCompletedDay
     : nextDayCandidate;
+
+  const completedAllLessons = [1, 2, 3, 4, 5, 6, 7].every((day) => progress.includes(day));
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -134,15 +135,32 @@ export default function DashboardPage() {
 
       <main className="flex-grow max-w-6xl mx-auto w-full p-6 md:p-12 space-y-12">
         <div className="text-center space-y-4">
-          <h2 className="text-4xl md:text-5xl font-serif text-foreground">Your 7-Day Transformation</h2>
+          <h2 className="text-4xl md:text-5xl font-serif text-foreground">{completedAllLessons ? "Reiki Level 1 Is Ready" : "Your 7-Day Transformation"}</h2>
           <p className="text-foreground-muted max-w-2xl mx-auto italic">
-            &quot;Each day is a new virtue, a new energy, a new step towards your highest self.&quot;
+            {completedAllLessons
+              ? "You are now ready to learn Reiki Level 1 with Baba Virtuehearts."
+              : "Each day is a new virtue, a new energy, a new step towards your highest self."}
           </p>
         </div>
 
-        <ProgressIndicator currentDay={currentDay} completedDays={progress} />
+        {!completedAllLessons && <ProgressIndicator currentDay={currentDay} completedDays={progress} />}
 
         <div className="grid grid-cols-1 gap-12 pt-8">
+          {completedAllLessons && (
+            <div className="mx-auto w-full max-w-4xl rounded-3xl border border-accent/40 bg-primary/10 p-8 text-center space-y-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-accent">New Large Lesson Unlocked</p>
+              <h3 className="text-4xl font-serif text-foreground">Learn Reiki Level 1</h3>
+              <p className="text-foreground-muted max-w-2xl mx-auto">
+                You completed all 7 lessons. Your next path is Reiki Level 1 training with Baba Virtuehearts.
+                Continue in Wellness for booking and advanced levels.
+              </p>
+              <p className="text-sm text-foreground-muted">Pricing: Level 1 $100 · Level 2 $250 · Master Level $250 · All 3 Levels Package $375</p>
+              <Link href="/wellness/reiki-classes" className="inline-block rounded-full bg-accent px-6 py-3 font-semibold text-background">
+                Continue to Reiki Classes
+              </Link>
+            </div>
+          )}
+
           {isNextDayLockedUntilMidnight && highestCompletedDay < 7 && (
             <div className="max-w-4xl mx-auto w-full rounded-2xl border border-accent/30 bg-primary/10 p-4 text-sm text-foreground-muted">
               You completed today&apos;s lesson. Please meditate on this wisdom and return after midnight local time to continue to Day {highestCompletedDay + 1}.
@@ -155,7 +173,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-           <DailyCard
+           {!completedAllLessons && <DailyCard
              day={currentDay}
              isCompleted={progress.includes(currentDay)}
              onComplete={(completedAt) => {
@@ -180,10 +198,10 @@ export default function DashboardPage() {
                  setCurrentDay(currentDay + 1);
                }
              }}
-           />
+           />}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 pt-12">
+        {!completedAllLessons && <div className="grid grid-cols-1 md:grid-cols-7 gap-4 pt-12">
           {[1, 2, 3, 4, 5, 6, 7].map((day) => (
             <button
               key={day}
@@ -218,7 +236,7 @@ export default function DashboardPage() {
               {progress.includes(day) && <p className="text-[10px] text-secondary mt-1 uppercase">Completed</p>}
             </button>
           ))}
-        </div>
+        </div>}
       </main>
 
       <footer className="p-8 text-center text-foreground-muted/40 text-sm">

@@ -16,7 +16,7 @@ function normalizeAssistantReply(text: string) {
     .replace(/\s+/g, " ")
     .trim();
 
-  return collapsed.length > 500 ? `${collapsed.slice(0, 497).trimEnd()}...` : collapsed;
+  return collapsed;
 }
 
 export async function GET(req: Request) {

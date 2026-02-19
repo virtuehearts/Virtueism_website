@@ -14,6 +14,8 @@ interface QuizItem {
   correct: number;
 }
 
+const MAX_GENERATION_RETRIES = 3;
+
 const parseJsonContent = (raw: unknown) => {
   if (typeof raw !== "string") return null;
   const cleaned = raw
@@ -34,6 +36,26 @@ async function getApiKey() {
   return setting?.openrouterApiKey || process.env.OPENROUTER_API_KEY;
 }
 
+async function requestOpenRouter(apiKey: string, prompt: string, maxTokens: number, json = false) {
+  const response = await axios.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      model: OPENROUTER_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: maxTokens,
+      ...(json ? { response_format: { type: "json_object" } } : {}),
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data?.choices?.[0]?.message?.content;
+}
+
 async function generatePreLessonText(virtue: string, goal: string) {
   const apiKey = await getApiKey();
   if (!apiKey) throw new Error("OpenRouter API key is not configured.");
@@ -46,29 +68,28 @@ async function generatePreLessonText(virtue: string, goal: string) {
   ];
 
   const chunks: string[] = [];
+
   for (const prompt of chunkPrompts) {
-    const response = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        model: OPENROUTER_MODEL,
-        messages: [{ role: "user", content: `${prompt}\nReturn plain text only.` }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
+    let generatedChunk = "";
+
+    for (let attempt = 1; attempt <= MAX_GENERATION_RETRIES; attempt++) {
+      const content = await requestOpenRouter(
+        apiKey,
+        `${prompt}\nReturn plain text only. Keep this section detailed and complete in 3-5 sentences.`,
+        420
+      );
+
+      if (typeof content === "string" && content.trim().length > 120) {
+        generatedChunk = content.trim();
+        break;
       }
-    );
-
-    const content = response.data?.choices?.[0]?.message?.content;
-    if (typeof content === "string" && content.trim()) {
-      chunks.push(content.trim());
     }
-  }
 
-  if (chunks.length < 4) {
-    throw new Error("Could not generate complete pre-lesson material.");
+    if (!generatedChunk) {
+      throw new Error("Could not generate complete pre-lesson material.");
+    }
+
+    chunks.push(generatedChunk);
   }
 
   return chunks.map((part, i) => `Section ${i + 1}\n${part}`).join("\n\n");
@@ -84,38 +105,26 @@ Personalize gently for user goal: ${goal}.
 Return strict JSON object: {"quiz":[{"question":"...","options":["...","...","...","..."],"correct":0}]}
 Lesson material:\n${preLessonText}`;
 
-  const response = await axios.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      model: OPENROUTER_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+  for (let attempt = 1; attempt <= MAX_GENERATION_RETRIES; attempt++) {
+    const raw = await requestOpenRouter(apiKey, prompt, 900, true);
+    const parsed = parseJsonContent(raw);
+    const quizRaw = Array.isArray(parsed?.quiz) ? parsed.quiz : [];
+
+    const quiz = quizRaw
+      .map((item: any) => ({
+        question: String(item?.question || "").trim(),
+        options: Array.isArray(item?.options) ? item.options.map((opt: unknown) => String(opt)) : [],
+        correct: Number(item?.correct),
+      }))
+      .filter((item: QuizItem) => item.question && item.options.length === 4 && Number.isInteger(item.correct) && item.correct >= 0 && item.correct <= 3)
+      .slice(0, 7);
+
+    if (quiz.length === 7) {
+      return quiz;
     }
-  );
-
-  const parsed = parseJsonContent(response.data?.choices?.[0]?.message?.content);
-  const quizRaw = Array.isArray(parsed?.quiz) ? parsed.quiz : [];
-
-  const quiz = quizRaw
-    .map((item: any) => ({
-      question: String(item?.question || "").trim(),
-      options: Array.isArray(item?.options) ? item.options.map((opt: unknown) => String(opt)) : [],
-      correct: Number(item?.correct),
-    }))
-    .filter((item: QuizItem) => item.question && item.options.length === 4 && Number.isInteger(item.correct) && item.correct >= 0 && item.correct <= 3)
-    .slice(0, 7);
-
-  if (quiz.length < 7) {
-    throw new Error("Quiz generation failed to return 7 valid questions.");
   }
 
-  return quiz;
+  throw new Error("Quiz generation failed to return 7 valid questions after retries.");
 }
 
 export async function POST(req: Request) {
