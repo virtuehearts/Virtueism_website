@@ -51,7 +51,7 @@ function LoginContent() {
 
     try {
       const res = await signIn("credentials", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
         callbackUrl,
         redirect: false,
