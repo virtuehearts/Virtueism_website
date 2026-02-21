@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense, useEffect } from "react";
-import { signIn, getProviders } from "next-auth/react";
+import { signIn, signOut, getProviders } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -44,12 +44,21 @@ function LoginContent() {
     fetchProviders();
   }, []);
 
+  const clearPreviousAuthState = async () => {
+    await signOut({ redirect: false });
+    await fetch("/api/auth/clear-session", {
+      method: "POST",
+      credentials: "include",
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
+      await clearPreviousAuthState();
       const res = await signIn("credentials", {
         email: email.trim().toLowerCase(),
         password,
@@ -75,7 +84,8 @@ function LoginContent() {
     }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
+    await clearPreviousAuthState();
     signIn("google", { callbackUrl });
   };
 

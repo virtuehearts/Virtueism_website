@@ -176,11 +176,15 @@ export const authOptions: NextAuthOptions = {
         try {
           const [dbUser] = await db.select().from(users).where(eq(users.email, email)).limit(1);
           if (dbUser) {
+            token.email = dbUser.email;
             token.id = dbUser.id;
             token.role = dbUser.role;
             token.status = dbUser.status;
           } else {
             console.warn(`[Auth] JWT callback: User ${email} not found in DB!`);
+            delete token.id;
+            delete token.role;
+            delete token.status;
           }
         } catch (error) {
           console.error(`[Auth] JWT callback error for ${email}:`, error);
