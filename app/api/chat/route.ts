@@ -133,17 +133,18 @@ export async function POST(req: Request) {
     }, memoryContext);
 
     const normalizedContent = normalizeAssistantReply(reply.content || "");
+    const safeContent = normalizedContent || "I am here with you. I had trouble forming a full response just now. Please send that again and I will continue.";
     const normalizedReply = {
       ...reply,
-      content: normalizedContent,
+      content: safeContent,
     };
 
-    await createInteractionMemories(session.user.id, lastUserMessage.content, normalizedContent);
+    await createInteractionMemories(session.user.id, lastUserMessage.content, safeContent);
 
     await db.insert(chatMessages).values({
       userId: session.user.id,
       role: "assistant",
-      content: normalizedContent
+      content: safeContent
     });
 
     return NextResponse.json(normalizedReply);

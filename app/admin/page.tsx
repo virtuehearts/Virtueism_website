@@ -97,7 +97,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    const callbackUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/login`
+      : "/login";
+    await signOut({ callbackUrl });
   };
 
   useEffect(() => {
