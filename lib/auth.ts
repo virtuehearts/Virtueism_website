@@ -196,6 +196,11 @@ export const authOptions: NextAuthOptions = {
         if (parsed.origin === baseUrl) {
           return url;
         }
+
+        // Keep redirects on the current deployment origin even if callback URLs were generated with localhost.
+        if (parsed.pathname.startsWith("/")) {
+          return `${baseUrl}${parsed.pathname}${parsed.search}${parsed.hash}`;
+        }
       } catch {
         // ignore invalid URL and fall through to baseUrl
       }

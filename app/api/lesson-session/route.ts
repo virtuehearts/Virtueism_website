@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { aiSettings, lessonSessions, users } from "@/lib/schema";
 import { OPENROUTER_MODEL } from "@/lib/ai-model";
+import { dailyContent } from "@/lib/content";
 
 interface QuizItem {
   question: string;
@@ -95,6 +96,68 @@ async function generatePreLessonText(virtue: string, goal: string) {
   return chunks.map((part, i) => `Section ${i + 1}\n${part}`).join("\n\n");
 }
 
+
+
+function buildFallbackQuiz(virtue: string): QuizItem[] {
+  const normalizedVirtue = virtue || "this virtue";
+  return [
+    {
+      question: `What is the central Reiki intention behind ${normalizedVirtue}?`,
+      options: ["Control", "Healing", "Competition", "Distraction"],
+      correct: 1,
+    },
+    {
+      question: `How should ${normalizedVirtue} be practiced daily?`,
+      options: ["With pressure", "Only once", "With consistency", "Only in groups"],
+      correct: 2,
+    },
+    {
+      question: `Which approach supports ${normalizedVirtue} best?`,
+      options: ["Judgment", "Presence", "Avoidance", "Urgency"],
+      correct: 1,
+    },
+    {
+      question: `In Reiki study, ${normalizedVirtue} is strongest when paired with:`,
+      options: ["Mindful breath", "Rush", "Silence only", "Isolation"],
+      correct: 0,
+    },
+    {
+      question: `What blocks progress with ${normalizedVirtue}?`,
+      options: ["Daily reflection", "Resistance", "Guided practice", "Compassion"],
+      correct: 1,
+    },
+    {
+      question: `A learner can embody ${normalizedVirtue} by:`,
+      options: ["Ignoring emotions", "Forcing outcomes", "Gentle repetition", "Comparing with others"],
+      correct: 2,
+    },
+    {
+      question: `Why is ${normalizedVirtue} important on the healing path?`,
+      options: ["It weakens focus", "It deepens alignment", "It replaces practice", "It removes responsibility"],
+      correct: 1,
+    },
+  ];
+}
+
+function buildFallbackPreLesson(day: number, virtue: string, goal: string) {
+  const dayContent = dailyContent[day];
+  if (dayContent?.lesson) {
+    return [
+      "Section 1\n" + dayContent.lesson,
+      "Section 2\n" + (dayContent.exercise || `Practice ${virtue} with mindful breath and reflection.`),
+      "Section 3\n" + (dayContent?.ritual?.steps?.join(" ") || `Visualize ${virtue} as radiant light in your energy field.`),
+      `Section 4\nApply ${virtue} in service of your goal: ${goal}. Keep your practice gentle, embodied, and consistent.`,
+    ].join("\n\n");
+  }
+
+  return [
+    `Section 1\n${virtue} is a foundational part of Reiki integration and inner balance.`,
+    `Section 2\nReflect on how ${virtue} appears in your words, thoughts, and actions each day.`,
+    `Section 3\nUse steady breathing and light visualization to anchor ${virtue} in your body.`,
+    `Section 4\nApply this virtue toward your personal goal: ${goal}.`,
+  ].join("\n\n");
+}
+
 async function generateQuiz(virtue: string, goal: string, preLessonText: string) {
   const apiKey = await getApiKey();
   if (!apiKey) throw new Error("OpenRouter API key is not configured.");
@@ -151,8 +214,17 @@ export async function POST(req: Request) {
       });
 
       const goal = user?.intake?.goal || "spiritual growth";
-      const preLessonText = await generatePreLessonText(virtue, goal);
-      const quiz = await generateQuiz(virtue, goal, preLessonText);
+      let preLessonText: string;
+      let quiz: QuizItem[];
+
+      try {
+        preLessonText = await generatePreLessonText(virtue, goal);
+        quiz = await generateQuiz(virtue, goal, preLessonText);
+      } catch (generationError) {
+        console.error("Lesson generation fallback activated:", generationError);
+        preLessonText = buildFallbackPreLesson(day, virtue, goal);
+        quiz = buildFallbackQuiz(virtue);
+      }
 
       const [saved] = await db
         .insert(lessonSessions)
