@@ -71,9 +71,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { messages: currentMessages } = await req.json();
+    const body = await req.json();
+    const currentMessages = Array.isArray(body?.messages) ? body.messages : [];
 
-    if (!Array.isArray(currentMessages) || currentMessages.length === 0) {
+    if (currentMessages.length === 0) {
       return NextResponse.json({ error: "Messages are required" }, { status: 400 });
     }
 
@@ -112,7 +113,23 @@ export async function POST(req: Request) {
       content: m.content
     })) || [];
 
-    const lastUserMessage = currentMessages[currentMessages.length - 1];
+    const normalizedIncoming = currentMessages
+      .map((message: unknown) => {
+        if (!message || typeof message !== "object") return null;
+        const role = (message as { role?: unknown }).role;
+        const content = (message as { content?: unknown }).content;
+        if ((role !== "user" && role !== "assistant") || typeof content !== "string") return null;
+        const normalizedContent = content.trim();
+        if (!normalizedContent) return null;
+        return { role, content: normalizedContent };
+      })
+      .filter((message: { role: "user" | "assistant"; content: string } | null): message is { role: "user" | "assistant"; content: string } => Boolean(message));
+
+    const lastUserMessage = [...normalizedIncoming].reverse().find((message) => message.role === "user");
+
+    if (!lastUserMessage) {
+      return NextResponse.json({ error: "A user message is required" }, { status: 400 });
+    }
 
     await db.insert(chatMessages).values({
       userId: session.user.id,
@@ -126,7 +143,7 @@ export async function POST(req: Request) {
       limit: 8,
     });
 
-    const reply = await chatWithMya([...history, lastUserMessage], user?.intake, {
+    const reply = await chatWithMya([...history, ...normalizedIncoming], user?.intake, {
       role: session.user.role,
       name: user?.name,
       email: user?.email,

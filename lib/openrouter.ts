@@ -20,7 +20,35 @@ type MemoryContext = Array<{
   confidence: number;
 }>;
 
-export async function chatWithMya(messages: any[], userContext?: any, user?: ChatUserContext, memory?: MemoryContext) {
+type ChatMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
+function normalizeMessages(messages: unknown[]): ChatMessage[] {
+  return messages
+    .map((message) => {
+      if (!message || typeof message !== "object") return null;
+
+      const role = (message as { role?: unknown }).role;
+      const content = (message as { content?: unknown }).content;
+
+      if ((role !== "system" && role !== "user" && role !== "assistant") || typeof content !== "string") {
+        return null;
+      }
+
+      const normalizedContent = content.trim();
+      if (!normalizedContent) return null;
+
+      return {
+        role,
+        content: normalizedContent,
+      } as ChatMessage;
+    })
+    .filter((message): message is ChatMessage => Boolean(message));
+}
+
+export async function chatWithMya(messages: unknown[], userContext?: any, user?: ChatUserContext, memory?: MemoryContext) {
   let [aiSettings] = await db.select().from(aiSettingsTable).where(eq(aiSettingsTable.id, "default")).limit(1);
 
   if (!aiSettings) {
@@ -83,9 +111,14 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
     content: `${systemContent}\n\n${conversationStylePrompt}\n\n${adminIdentityPrompt}\n\n${memoryLayerPrompt}`.trim(),
   };
 
-  const contextMessages = messages.slice(-Math.max(1, aiSettings.maxContextMessages || 40));
+  const normalizedMessages = normalizeMessages(messages);
+  const contextMessages = normalizedMessages.slice(-Math.max(1, aiSettings.maxContextMessages || 40));
 
   const requestedModel = aiSettings.model || OPENROUTER_MODEL;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    || process.env.NEXTAUTH_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://virtueism.org");
 
   const runCompletion = async (model: string) => axios.post(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -100,7 +133,11 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": appUrl,
+        "X-Title": "Virtueism",
+        "X-Author": "Virtuehearts",
       },
+      timeout: 60_000,
     }
   );
 
@@ -156,7 +193,11 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          "HTTP-Referer": appUrl,
+          "X-Title": "Virtueism",
+          "X-Author": "Virtuehearts",
         },
+        timeout: 60_000,
       }
     );
 

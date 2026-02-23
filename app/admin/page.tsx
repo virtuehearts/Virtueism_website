@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { logoutToLogin } from "@/lib/client-auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { OPENROUTER_MODEL } from "@/lib/ai-model";
@@ -97,7 +98,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await logoutToLogin();
   };
 
   useEffect(() => {
