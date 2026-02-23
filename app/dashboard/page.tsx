@@ -1,6 +1,7 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { logoutToLogin } from "@/lib/client-auth";
 import { useEffect, useState } from "react";
 import IntakeForm from "@/components/IntakeForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
@@ -30,7 +31,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await logoutToLogin();
   };
 
   const highestCompletedDay = progress.length ? Math.max(...progress) : 0;

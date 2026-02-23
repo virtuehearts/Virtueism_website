@@ -1,6 +1,7 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { logoutToLogin } from "@/lib/client-auth";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +44,7 @@ export default function PendingPage() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await logoutToLogin();
   };
 
   useEffect(() => {
