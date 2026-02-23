@@ -97,16 +97,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   const handleSignOut = async () => {
-    const callbackUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/login`
-      : "/login";
-
-    await signOut({ callbackUrl, redirect: false });
-    await fetch("/api/auth/clear-session", {
-      method: "POST",
-      credentials: "include",
-    });
-    window.location.assign(callbackUrl);
+    await signOut({ callbackUrl: "/login" });
   };
 
   useEffect(() => {
