@@ -85,10 +85,12 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
 
   const contextMessages = messages.slice(-Math.max(1, aiSettings.maxContextMessages || 40));
 
-  const response = await axios.post(
+  const requestedModel = aiSettings.model || OPENROUTER_MODEL;
+
+  const runCompletion = async (model: string) => axios.post(
     "https://openrouter.ai/api/v1/chat/completions",
     {
-      model: aiSettings.model || OPENROUTER_MODEL,
+      model,
       temperature: aiSettings.temperature,
       top_p: aiSettings.topP,
       max_tokens: 180,
@@ -98,11 +100,24 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
-        "X-Title": "Virtueism Mya Chat",
       },
     }
   );
+
+  let response;
+  try {
+    response = await runCompletion(requestedModel);
+  } catch (error) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const shouldFallbackToDefaultModel = requestedModel !== OPENROUTER_MODEL && (status === 403 || status === 404 || status === 429);
+
+    if (!shouldFallbackToDefaultModel) {
+      throw error;
+    }
+
+    console.warn(`Chat model '${requestedModel}' rejected by OpenRouter (status ${status}). Falling back to '${OPENROUTER_MODEL}'.`);
+    response = await runCompletion(OPENROUTER_MODEL);
+  }
 
   const message = response.data?.choices?.[0]?.message || {};
   const rawContent = message.content;
@@ -127,7 +142,7 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
     };
   }
 
-  if ((aiSettings.model || OPENROUTER_MODEL) !== OPENROUTER_MODEL) {
+  if (requestedModel !== OPENROUTER_MODEL) {
     const fallbackResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -141,8 +156,6 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
-          "X-Title": "Virtueism Mya Chat",
         },
       }
     );
