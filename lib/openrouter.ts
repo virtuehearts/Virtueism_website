@@ -102,5 +102,60 @@ export async function chatWithMya(messages: any[], userContext?: any, user?: Cha
     }
   );
 
-  return response.data.choices[0].message;
+  const message = response.data?.choices?.[0]?.message || {};
+  const rawContent = message.content;
+  const normalizedContent = Array.isArray(rawContent)
+    ? rawContent
+        .map((part: any) => {
+          if (typeof part === "string") return part;
+          if (typeof part?.text === "string") return part.text;
+          if (typeof part?.content === "string") return part.content;
+          return "";
+        })
+        .join(" ")
+        .trim()
+    : typeof rawContent === "string"
+      ? rawContent.trim()
+      : "";
+
+  if (normalizedContent) {
+    return {
+      ...message,
+      content: normalizedContent,
+    };
+  }
+
+  if ((aiSettings.model || OPENROUTER_MODEL) !== OPENROUTER_MODEL) {
+    const fallbackResponse = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: OPENROUTER_MODEL,
+        temperature: aiSettings.temperature,
+        top_p: aiSettings.topP,
+        max_tokens: 220,
+        messages: [systemPrompt, ...contextMessages],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const fallbackMessage = fallbackResponse.data?.choices?.[0]?.message || {};
+    const fallbackContent = typeof fallbackMessage.content === "string"
+      ? fallbackMessage.content.trim()
+      : "";
+
+    return {
+      ...fallbackMessage,
+      content: fallbackContent,
+    };
+  }
+
+  return {
+    ...message,
+    content: "",
+  };
 }
