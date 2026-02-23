@@ -16,6 +16,7 @@ interface QuizItem {
 }
 
 const MAX_GENERATION_RETRIES = 3;
+const MIN_SECTION_WORDS = 400;
 
 const parseJsonContent = (raw: unknown) => {
   if (typeof raw !== "string") return null;
@@ -76,11 +77,15 @@ async function generatePreLessonText(virtue: string, goal: string) {
     for (let attempt = 1; attempt <= MAX_GENERATION_RETRIES; attempt++) {
       const content = await requestOpenRouter(
         apiKey,
-        `${prompt}\nReturn plain text only. Keep this section detailed and complete in 3-5 sentences.`,
-        420
+        `${prompt}\nReturn plain text only. Write at least ${MIN_SECTION_WORDS} words for this part so the complete 4-part lesson reads like at least four pages total. Include practical guidance, real-life examples, reflective prompts, and gentle Reiki coaching language.`,
+        1400
       );
 
-      if (typeof content === "string" && content.trim().length > 120) {
+      const wordCount = typeof content === "string"
+        ? content.trim().split(/\s+/).filter(Boolean).length
+        : 0;
+
+      if (typeof content === "string" && wordCount >= MIN_SECTION_WORDS) {
         generatedChunk = content.trim();
         break;
       }
@@ -143,10 +148,10 @@ function buildFallbackPreLesson(day: number, virtue: string, goal: string) {
   const dayContent = dailyContent[day];
   if (dayContent?.lesson) {
     return [
-      "Section 1\n" + dayContent.lesson,
-      "Section 2\n" + (dayContent.exercise || `Practice ${virtue} with mindful breath and reflection.`),
-      "Section 3\n" + (dayContent?.ritual?.steps?.join(" ") || `Visualize ${virtue} as radiant light in your energy field.`),
-      `Section 4\nApply ${virtue} in service of your goal: ${goal}. Keep your practice gentle, embodied, and consistent.`,
+      `Section 1\n${dayContent.lesson}\n\n${virtue} becomes most transformative when you move from understanding into repetition. Reflect on where this virtue naturally appears in your daily rhythm, then identify where it fades under stress. Describe one recent moment when you could have called on ${virtue} more consciously and rewrite that moment in your journal as if you responded from spiritual steadiness. Repeat this reflection over seven days so insight becomes embodiment. Keep your breath slow and your body relaxed while reading and writing; this conditions your nervous system to associate the virtue with calm safety.`,
+      `Section 2\n${dayContent.exercise || `Practice ${virtue} with mindful breath and reflection.`}\n\nSet a clear daily micro-practice connected to ${virtue}. Use a morning check-in, midday pause, and evening review. During each phase, ask: What am I feeling? What do I need? How can ${virtue} guide this moment? In the evening, score yourself gently from 1 to 10 and write one practical adjustment for tomorrow. Add body awareness by noticing jaw tension, shoulders, chest, and belly; each area can become a signal for returning to Reiki presence. Over time, this turns ${virtue} into an automatic healing response rather than a concept you only remember in calm moments.`,
+      `Section 3\n${dayContent?.ritual?.steps?.join(" ") || `Visualize ${virtue} as radiant light in your energy field.`}\n\nCreate a 12-minute breath and visualization flow. Inhale for four counts and exhale for six, repeating until your heartbeat feels steady. Visualize ${virtue} as warm light entering through the crown, filling the chest, and extending through the hands. Place your hands over your heart and solar plexus while silently repeating an affirmation linked to your goal: ${goal}. Then imagine one person, one challenge, and one upcoming decision surrounded by this same light. This anchors the virtue into relationships, responsibilities, and action. Close by writing one sentence beginning with, "Today I embody ${virtue} by..." and complete it with a concrete commitment.`,
+      `Section 4\nApply ${virtue} in service of your goal: ${goal}. Keep your practice gentle, embodied, and consistent.\n\nLong-term spiritual growth happens through guided accountability, not intensity alone. Use this virtue to shape your conversations, boundaries, schedule, and healing choices each week. If you feel blocked, seek support through mentorship, private sessions, or structured guidance so the lesson becomes lived change. Review your progress every seven days by tracking emotional regulation, clarity in decisions, and consistency of practice. When you notice even a small shift, bless it and continue. This is how Reiki practice matures: one honest breath, one aligned action, one day at a time, with ${virtue} as your steady inner compass.`,
     ].join("\n\n");
   }
 
