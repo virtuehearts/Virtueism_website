@@ -70,6 +70,8 @@ export async function POST(req: Request) {
       .returning();
 
     if (typeof photoBase64 === "string" && photoBase64.startsWith("data:image/")) {
+      // Note: Large base64 images are stored in the DB but MUST be excluded from the session JWT
+      // to avoid exceeding the 4KB cookie limit. See lib/auth.ts for exclusion logic.
       await db.update(users)
         .set({ image: photoBase64 })
         .where(eq(users.id, session.user.id));

@@ -6,6 +6,19 @@ import { OPENROUTER_MODEL } from "./ai-model";
 
 const OPENROUTER_API_KEY_ENV = process.env.OPENROUTER_API_KEY?.trim();
 
+/**
+ * Normalizes OpenRouter API keys to ensure they have the 'sk-or-' prefix if needed.
+ * This prevents 'Missing Authentication header' errors from OpenRouter.
+ */
+function normalizeOpenRouterKey(key: string | undefined): string | undefined {
+  if (!key) return key;
+  const trimmed = key.trim();
+  if (trimmed.startsWith("v1-") && !trimmed.startsWith("sk-or-v1-")) {
+    return `sk-or-${trimmed}`;
+  }
+  return trimmed;
+}
+
 type ChatUserContext = {
   role?: string;
   name?: string | null;
@@ -104,7 +117,8 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
   const candidateApiKeys = Array.from(new Set([
     OPENROUTER_API_KEY_ENV,
     dbApiKey,
-  ].filter((value): value is string => {
+  ].map(normalizeOpenRouterKey)
+   .filter((value): value is string => {
     if (!value) return false;
     const trimmed = value.trim();
     return trimmed.length > 0 && !trimmed.toLowerCase().includes("placeholder");

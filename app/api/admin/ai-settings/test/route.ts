@@ -11,10 +11,16 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { model, apiKey } = body;
+    let { model, apiKey } = body;
 
     if (!model || !apiKey) {
       return NextResponse.json({ error: "Model and API key are required" }, { status: 400 });
+    }
+
+    // Normalization to prevent 'Missing Authentication header' errors
+    apiKey = apiKey.trim();
+    if (apiKey.startsWith("v1-") && !apiKey.startsWith("sk-or-v1-")) {
+      apiKey = `sk-or-${apiKey}`;
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -31,7 +37,7 @@ export async function POST(req: Request) {
         },
         {
           headers: {
-            Authorization: `Bearer ${apiKey.trim()}`,
+            Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
             "HTTP-Referer": appUrl,
             "X-Title": "Virtueism Admin Test",
