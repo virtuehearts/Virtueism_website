@@ -10,7 +10,7 @@ if (!TEST_KEY) {
 
 const DB_URL = process.env.DATABASE_URL || 'file:dev.db';
 const DB_PATH = DB_URL.replace(/^file:/, '');
-const DEFAULT_MODEL = 'nvidia/nemotron-3-nano-30b-a3b:free';
+const DEFAULT_MODEL = 'openrouter/free';
 
 const db = new Database(DB_PATH);
 
@@ -92,7 +92,9 @@ async function runCompletion(apiKey, payload, requestedModel) {
     return { res, finalModel: requestedModel, fallbackUsed: false };
   } catch (error) {
     const status = error?.response?.status;
-    if (requestedModel !== DEFAULT_MODEL && [403, 404, 429].includes(status)) {
+    // OpenRouter may return 400 for invalid model IDs as well
+    if (requestedModel !== DEFAULT_MODEL && [400, 403, 404, 429].includes(status)) {
+      console.log(`Falling back from ${requestedModel} due to status ${status}`);
       const res = await doRequest(DEFAULT_MODEL);
       return { res, finalModel: DEFAULT_MODEL, fallbackUsed: true, fallbackStatus: status };
     }
@@ -166,7 +168,7 @@ async function main() {
       const payload = {
         temperature: settings.temperature,
         top_p: settings.topP,
-        max_tokens: 180,
+        max_tokens: 1000,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: scenario.message },
@@ -174,6 +176,7 @@ async function main() {
       };
 
       const { res, finalModel, fallbackUsed, fallbackStatus } = await runCompletion(TEST_KEY, payload, settings.model || DEFAULT_MODEL);
+      console.log(`Scenario ${scenario.name} response:`, JSON.stringify(res.data, null, 2));
       const content = res?.data?.choices?.[0]?.message?.content;
       const normalized = Array.isArray(content)
         ? content.map((x) => (typeof x === 'string' ? x : x?.text || x?.content || '')).join(' ').trim()

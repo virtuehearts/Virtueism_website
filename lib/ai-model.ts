@@ -1,1 +1,1 @@
-export const OPENROUTER_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free";
+export const OPENROUTER_MODEL = "google/gemma-3-27b-it:free";
