@@ -4,7 +4,7 @@ import { aiSettings as aiSettingsTable } from "./schema";
 import { eq } from "drizzle-orm";
 import { OPENROUTER_MODEL } from "./ai-model";
 
-const OPENROUTER_API_KEY_ENV = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY_ENV = process.env.OPENROUTER_API_KEY?.trim();
 
 type ChatUserContext = {
   role?: string;
@@ -100,9 +100,13 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
       .map((entry) => `${entry.content} [${entry.type}${entry.pinned ? ", pinned" : ""}, confidence ${entry.confidence}]`)
       .join("\n- ")}`
     : "";
-  const apiKey = aiSettings.openrouterApiKey || OPENROUTER_API_KEY_ENV;
+  const dbApiKey = aiSettings.openrouterApiKey?.trim();
+  const candidateApiKeys = Array.from(new Set([
+    OPENROUTER_API_KEY_ENV,
+    dbApiKey,
+  ].filter((value): value is string => Boolean(value))));
 
-  if (!apiKey) {
+  if (!candidateApiKeys.length) {
     throw new Error("OpenRouter API key is not configured.");
   }
 
@@ -120,7 +124,7 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
     || process.env.NEXTAUTH_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://virtueism.org");
 
-  const runCompletion = async (model: string) => axios.post(
+  const runCompletion = async (model: string, apiKey: string) => axios.post(
     "https://openrouter.ai/api/v1/chat/completions",
     {
       model,
@@ -135,25 +139,55 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
         "Content-Type": "application/json",
         "HTTP-Referer": appUrl,
         "X-Title": "Virtueism",
-        "X-Author": "Virtuehearts",
       },
       timeout: 60_000,
     }
   );
 
-  let response;
-  try {
-    response = await runCompletion(requestedModel);
-  } catch (error) {
-    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-    const shouldFallbackToDefaultModel = requestedModel !== OPENROUTER_MODEL && (status === 403 || status === 404 || status === 429);
+  const tryWithFallbackModel = async (apiKey: string) => {
+    try {
+      return await runCompletion(requestedModel, apiKey);
+    } catch (error) {
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const shouldFallbackToDefaultModel = requestedModel !== OPENROUTER_MODEL && (status === 403 || status === 404 || status === 429);
 
-    if (!shouldFallbackToDefaultModel) {
-      throw error;
+      if (!shouldFallbackToDefaultModel) {
+        throw error;
+      }
+
+      console.warn(`Chat model '${requestedModel}' rejected by OpenRouter (status ${status}). Falling back to '${OPENROUTER_MODEL}'.`);
+      return runCompletion(OPENROUTER_MODEL, apiKey);
     }
+  };
 
-    console.warn(`Chat model '${requestedModel}' rejected by OpenRouter (status ${status}). Falling back to '${OPENROUTER_MODEL}'.`);
-    response = await runCompletion(OPENROUTER_MODEL);
+  let response: Awaited<ReturnType<typeof runCompletion>> | null = null;
+  let lastError: unknown;
+
+  for (const apiKey of candidateApiKeys) {
+    try {
+      response = await tryWithFallbackModel(apiKey);
+      break;
+    } catch (error) {
+      lastError = error;
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const errorDetail = axios.isAxiosError(error) ? error.response?.data : undefined;
+      const isAuthLikeError = status === 401 || status === 403;
+
+      if (!isAuthLikeError) {
+        throw error;
+      }
+
+      console.warn("OpenRouter request failed with current API key.", {
+        status,
+        detail: errorDetail,
+      });
+    }
+  }
+
+  if (!response) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("OpenRouter request failed.");
   }
 
   const message = response.data?.choices?.[0]?.message || {};
@@ -180,26 +214,7 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
   }
 
   if (requestedModel !== OPENROUTER_MODEL) {
-    const fallbackResponse = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        model: OPENROUTER_MODEL,
-        temperature: aiSettings.temperature,
-        top_p: aiSettings.topP,
-        max_tokens: 220,
-        messages: [systemPrompt, ...contextMessages],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": appUrl,
-          "X-Title": "Virtueism",
-          "X-Author": "Virtuehearts",
-        },
-        timeout: 60_000,
-      }
-    );
+    const fallbackResponse = await runCompletion(OPENROUTER_MODEL, candidateApiKeys[0]);
 
     const fallbackMessage = fallbackResponse.data?.choices?.[0]?.message || {};
     const fallbackContent = typeof fallbackMessage.content === "string"

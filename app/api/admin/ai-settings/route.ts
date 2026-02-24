@@ -36,6 +36,14 @@ export async function POST(req: Request) {
     const model = typeof body.model === "string" && body.model.trim().length > 0
       ? body.model.trim()
       : OPENROUTER_MODEL;
+    const incomingApiKey = typeof body.openrouterApiKey === "string"
+      ? body.openrouterApiKey.trim()
+      : undefined;
+
+    const existing = await db.query.aiSettings.findFirst({ where: eq(aiSettingsTable.id, "default") });
+    const resolvedApiKey = incomingApiKey && incomingApiKey.length > 0
+      ? incomingApiKey
+      : (existing?.openrouterApiKey || null);
 
     const [settings] = await db.insert(aiSettingsTable)
       .values({
@@ -46,7 +54,7 @@ export async function POST(req: Request) {
         topP: parseFloat(body.topP),
         maxContextMessages: Math.max(5, parseInt(body.maxContextMessages, 10) || 40),
         enableMemory: body.enableMemory !== false,
-        openrouterApiKey: body.openrouterApiKey,
+        openrouterApiKey: resolvedApiKey,
       })
       .onConflictDoUpdate({
         target: [aiSettingsTable.id],
@@ -57,7 +65,7 @@ export async function POST(req: Request) {
           topP: parseFloat(body.topP),
           maxContextMessages: Math.max(5, parseInt(body.maxContextMessages, 10) || 40),
           enableMemory: body.enableMemory !== false,
-          openrouterApiKey: body.openrouterApiKey,
+          openrouterApiKey: resolvedApiKey,
           updatedAt: new Date(),
         },
       })
