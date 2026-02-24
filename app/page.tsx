@@ -1,4 +1,6 @@
 import Link from "next/link";
+import fs from "fs";
+import path from "path";
 import {
   CalendarCheck,
   CheckCircle2,
@@ -9,6 +11,7 @@ import {
   Sparkles,
   Waves,
 } from "lucide-react";
+import VideoSlideshow from "@/components/VideoSlideshow";
 
 const trainingDays = [
   "Day 1: Introduction to Reiki energy and spiritual grounding",
@@ -25,25 +28,25 @@ const services = [
     title: "Reiki Sessions",
     description:
       "Personalized healing sessions focused on clarity, release, and energetic renewal.",
-    href: "/wellness/reiki-sessions",
+    href: "/reiki-sessions",
   },
   {
     title: "Reiki Classes",
     description:
       "Train with Baba Virtuehearts through guided online Reiki class pathways.",
-    href: "/wellness/reiki-classes",
+    href: "/reiki-classes",
   },
   {
     title: "Massage Therapy",
     description:
       "Relaxing bodywork sessions designed to support deep rest and emotional balance.",
-    href: "/wellness/massage",
+    href: "/massage",
   },
   {
-    title: "Explore All Wellness",
+    title: "Healing Touch",
     description:
-      "See all wellness services, class options, and booking details in one place.",
-    href: "/wellness",
+      "Healing Touch Services that heal your Aura and Energy flow, perfect for anxiety and stress.",
+    href: "/healingtouch",
   },
 ];
 
@@ -54,26 +57,20 @@ const membershipPerks = [
   "Ongoing guidance after your 7-day foundation program",
 ];
 
-const slideshowFrames = [
-  {
-    src: "/slideshow/01.jpg",
-    alt: "Meditation circle during a guided session",
-  },
-  {
-    src: "/slideshow/02.jpg",
-    alt: "Reiki practitioner offering a calming session",
-  },
-  {
-    src: "/slideshow/03.jpg",
-    alt: "Peaceful wellness room prepared for healing",
-  },
-  {
-    src: "/slideshow/04.jpg",
-    alt: "Students participating in mindful breathwork",
-  },
-];
-
 export default function HomePage() {
+  const clipsDir = path.join(process.cwd(), "public/clips");
+  let videoClips: string[] = [];
+  try {
+    if (fs.existsSync(clipsDir)) {
+      videoClips = fs.readdirSync(clipsDir)
+        .filter(file => file.endsWith(".mp4"))
+        .sort()
+        .map(file => `/clips/${file}`);
+    }
+  } catch (error) {
+    console.error("Error reading clips directory:", error);
+  }
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0d0720] text-white">
       <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
@@ -162,37 +159,30 @@ export default function HomePage() {
         </section>
 
         <section id="gallery" className="mx-auto w-full max-w-6xl px-4 py-6 lg:py-10">
-          <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
+          <div className="grid items-center gap-8 lg:grid-cols-[1fr_1fr]">
             <div>
               <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-200">
                 <Flower2 className="h-4 w-4" />
                 Healing Gallery Slideshow
               </span>
               <h2 className="mb-4 text-3xl font-bold md:text-4xl">A Captivating Look Into Sessions</h2>
-              <p className="max-w-xl text-violet-100/80">
-                This slideshow uses placeholders in a 720 × 400 format. Add your real photos to
-                <span className="mx-1 rounded bg-violet-500/20 px-1 py-0.5 text-violet-100">/public/slideshow</span>
-                as 01.jpg, 02.jpg, 03.jpg and so on to instantly update this section.
-              </p>
+              <div className="space-y-4 max-w-xl text-violet-100/80 leading-relaxed">
+                <p>
+                  This is a preview of the sessions, the healing energy and your aura, and mind, how it will expand and change, with the knowledge of Virtueism Reiki, once you receive your training you will be able to get a certificate and practice these sessions yourself.
+                </p>
+                <p>
+                  Experience the deep tranquility and restorative power of energy work as you watch these highlights from our sanctuary. As you watch these moments of transition and peace, imagine the potential within your own energy field.
+                </p>
+                <p>
+                  Our training provides the tools to not only heal yourself but to become a beacon of light for others. Through dedicated practice and the support of our community, your understanding of the subtle energies will deepen, leading to a more balanced and purposeful life. These clips offer just a glimpse of the profound impact that Virtueism Reiki can have on your spiritual journey.
+                </p>
+              </div>
             </div>
 
-            <div className="glass-panel relative overflow-hidden rounded-2xl border border-violet-400/30 p-3">
-              <div className="slideshow-frame aspect-[9/5] w-full overflow-hidden rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-950/70 via-indigo-950/60 to-[#0a0818]">
-                {slideshowFrames.map((slide, index) => (
-                  <div
-                    key={slide.src}
-                    className="slideshow-slide"
-                    style={{
-                      backgroundImage: `linear-gradient(180deg, rgba(13,7,32,0.15), rgba(13,7,32,0.7)), url('${slide.src}')`,
-                      animationDelay: `${index * 5}s`,
-                    }}
-                    aria-label={slide.alt}
-                    role="img"
-                  />
-                ))}
-
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[#0d0720] to-transparent p-5">
-                  <p className="text-sm text-violet-100/80">Suggested imagery: meditation circles, Reiki sessions, mindful healing spaces.</p>
+            <div className="flex justify-center lg:justify-end">
+              <div className="glass-panel relative overflow-hidden rounded-2xl border border-violet-400/30 p-3 w-full max-w-[424px]">
+                <div className="relative aspect-[9/16] w-full overflow-hidden rounded-xl border border-violet-300/20 bg-black">
+                  <VideoSlideshow videos={videoClips} />
                 </div>
               </div>
             </div>
@@ -216,11 +206,13 @@ export default function HomePage() {
 
         <section id="services" className="mx-auto w-full max-w-6xl px-4 py-14">
           <h2 className="mb-8 text-3xl font-bold md:text-4xl">Wellness Services</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {services.map((service) => (
-              <article key={service.title} className="glass-panel rounded-xl border border-violet-500/20 p-6">
-                <h3 className="mb-2 text-xl font-semibold">{service.title}</h3>
-                <p className="text-violet-100/80">{service.description}</p>
+              <article key={service.title} className="glass-panel rounded-xl border border-violet-500/20 p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="mb-2 text-xl font-semibold">{service.title}</h3>
+                  <p className="text-violet-100/80 text-sm">{service.description}</p>
+                </div>
                 <Link href={service.href} className="mt-4 inline-block text-sm text-violet-200 underline underline-offset-4 hover:text-violet-100">
                   More info
                 </Link>

@@ -1,5 +1,5 @@
 export type WellnessService = {
-  slug: "reiki-sessions" | "reiki-classes" | "massage";
+  slug: "reiki-sessions" | "reiki-classes" | "massage" | "healingtouch";
   title: string;
   summary: string;
   details: string[];
@@ -49,6 +49,19 @@ export const wellnessServices: WellnessService[] = [
     pricing: [
       { label: "Single session", price: "$80 / hour" },
       { label: "Package", price: "5 sessions for $350" },
+    ],
+  },
+  {
+    slug: "healingtouch",
+    title: "Healing Touch",
+    summary: "Healing Touch Services that heal your Aura and Energy flow, perfect for anxiety and stress.",
+    details: [
+      "A therapeutic approach that uses touch to influence the energy system.",
+      "Supports physical, emotional, mental, and spiritual health and healing.",
+      "Sessions are focused on clearing, aligning, and balancing the energy field.",
+    ],
+    pricing: [
+      { label: "Standard session", price: "$90" },
     ],
   },
 ];
