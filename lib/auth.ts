@@ -55,7 +55,9 @@ export const authorize = async (credentials: Record<"email" | "password", string
       } else {
         await touchLastLogin(user.id);
       }
-      return user as any;
+      // Return a clean user object to avoid cookie size issues with large base64 images
+      const { password: _, image: __, ...cleanUser } = user as any;
+      return cleanUser;
     }
   }
 
@@ -84,7 +86,8 @@ export const authorize = async (credentials: Record<"email" | "password", string
         .returning();
       user = updatedUser;
     }
-    return user as any;
+    const { password: _, image: __, ...cleanUser } = user as any;
+    return cleanUser;
   }
 
   // 3. Final failure checks
@@ -118,7 +121,8 @@ export const authorize = async (credentials: Record<"email" | "password", string
 
   await touchLastLogin(user.id);
 
-  return user as any;
+  const { password: _, image: __, ...cleanUser } = user as any;
+  return cleanUser;
 };
 
 export const authOptions: NextAuthOptions = {
@@ -166,6 +170,18 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
+      if (user) {
+        // On first sign-in, ensure we don't carry over any large base64 images into the JWT.
+        // Browsers have a 4KB limit for cookies, and base64 images easily exceed this.
+        if (typeof token.picture === 'string' && token.picture.startsWith('data:image/')) {
+          console.log(`[Auth] Removing large base64 picture from JWT for ${token.email}`);
+          delete token.picture;
+        }
+        if (typeof token.image === 'string' && token.image.startsWith('data:image/')) {
+          delete token.image;
+        }
+      }
+
       const emailSource = user?.email || token.email;
       if (emailSource) {
         const email = emailSource.trim().toLowerCase();
