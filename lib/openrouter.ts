@@ -104,7 +104,11 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
   const candidateApiKeys = Array.from(new Set([
     OPENROUTER_API_KEY_ENV,
     dbApiKey,
-  ].filter((value): value is string => Boolean(value))));
+  ].filter((value): value is string => {
+    if (!value) return false;
+    const trimmed = value.trim();
+    return trimmed.length > 0 && !trimmed.toLowerCase().includes("placeholder");
+  })));
 
   if (!candidateApiKeys.length) {
     throw new Error("OpenRouter API key is not configured.");
@@ -130,7 +134,7 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
       model,
       temperature: aiSettings.temperature,
       top_p: aiSettings.topP,
-      max_tokens: 180,
+      max_tokens: 1000,
       messages: [systemPrompt, ...contextMessages],
     },
     {
@@ -149,23 +153,26 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
       return await runCompletion(requestedModel, apiKey);
     } catch (error) {
       const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-      const shouldFallbackToDefaultModel = requestedModel !== OPENROUTER_MODEL && (status === 403 || status === 404 || status === 429);
+      // Also fallback on 400 because sometimes invalid model params/names return 400
+      const shouldFallbackToDefaultModel = requestedModel !== "openrouter/free" && (status === 400 || status === 403 || status === 404 || status === 429);
 
       if (!shouldFallbackToDefaultModel) {
         throw error;
       }
 
-      console.warn(`Chat model '${requestedModel}' rejected by OpenRouter (status ${status}). Falling back to '${OPENROUTER_MODEL}'.`);
-      return runCompletion(OPENROUTER_MODEL, apiKey);
+      console.warn(`Chat model '${requestedModel}' rejected by OpenRouter (status ${status}). Falling back to 'openrouter/free'.`);
+      return runCompletion("openrouter/free", apiKey);
     }
   };
 
   let response: Awaited<ReturnType<typeof runCompletion>> | null = null;
   let lastError: unknown;
+  let successfulApiKey: string | null = null;
 
   for (const apiKey of candidateApiKeys) {
     try {
       response = await tryWithFallbackModel(apiKey);
+      successfulApiKey = apiKey;
       break;
     } catch (error) {
       lastError = error;
@@ -213,8 +220,8 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
     };
   }
 
-  if (requestedModel !== OPENROUTER_MODEL) {
-    const fallbackResponse = await runCompletion(OPENROUTER_MODEL, candidateApiKeys[0]);
+  if (requestedModel !== "openrouter/free" && successfulApiKey) {
+    const fallbackResponse = await runCompletion("openrouter/free", successfulApiKey);
 
     const fallbackMessage = fallbackResponse.data?.choices?.[0]?.message || {};
     const fallbackContent = typeof fallbackMessage.content === "string"

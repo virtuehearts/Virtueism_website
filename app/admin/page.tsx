@@ -96,6 +96,20 @@ export default function AdminPage() {
   const [replyContent, setReplyContent] = useState<{ [key: string]: string }>({});
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [testingModel, setTestingModel] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const POPULAR_FREE_MODELS = [
+    { id: "openrouter/free", name: "OpenRouter Free (Auto-routing)" },
+    { id: "google/gemma-3-27b-it:free", name: "Gemma 3 27B IT (Free)" },
+    { id: "google/gemma-3-12b-it:free", name: "Gemma 3 12B IT (Free)" },
+    { id: "google/gemma-3-4b-it:free", name: "Gemma 3 4B IT (Free)" },
+    { id: "nvidia/nemotron-3-nano-30b-a3b:free", name: "Nemotron 3 Nano 30B (Free)" },
+    { id: "mistralai/mistral-small-3.1-24b-instruct:free", name: "Mistral Small 3.1 24B (Free)" },
+    { id: "meta-llama/llama-3.2-3b-instruct:free", name: "Llama 3.2 3B (Free)" },
+    { id: "liquid/lfm-2.5-1.2b-thinking:free", name: "Liquid LFM 2.5 1.2B Thinking (Free)" },
+    { id: "qwen/qwen-2.5-72b-instruct:free", name: "Qwen 2.5 72B (Free)" },
+  ];
 
   const handleSignOut = async () => {
     await logoutToLogin();
@@ -208,9 +222,42 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aiSettings),
       });
-      if (res.ok) alert("AI Settings updated successfully");
+      if (res.ok) {
+        alert("AI Settings updated successfully");
+        setTestResult(null);
+      }
     } catch {
       alert("Failed to update AI settings");
+    }
+  };
+
+  const handleTestConnection = async () => {
+    if (!aiSettings.model || !aiSettings.openrouterApiKey) {
+      alert("Please provide both a model and an API key to test.");
+      return;
+    }
+
+    setTestingModel(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/admin/ai-settings/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: aiSettings.model,
+          apiKey: aiSettings.openrouterApiKey,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setTestResult({ ok: true, message: `Connected! Response: ${data.content}` });
+      } else {
+        setTestResult({ ok: false, message: `Failed: ${data.error}` });
+      }
+    } catch (err) {
+      setTestResult({ ok: false, message: "Error testing connection" });
+    } finally {
+      setTestingModel(false);
     }
   };
 
@@ -593,13 +640,29 @@ export default function AdminPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-sm font-semibold text-foreground-muted">OpenRouter Model</label>
-                        <input
-                          type="text"
-                          value={aiSettings.model}
-                          onChange={(e) => setAiSettings({ ...aiSettings, model: e.target.value })}
-                          className="w-full bg-background border border-primary/20 rounded-xl p-3 text-sm focus:border-accent outline-none"
-                          placeholder="nvidia/nemotron-3-nano-30b-a3b:free"
-                        />
+                        <div className="flex flex-col gap-2">
+                          <select
+                            value={POPULAR_FREE_MODELS.some(m => m.id === aiSettings.model) ? aiSettings.model : "custom"}
+                            onChange={(e) => {
+                              setAiSettings({ ...aiSettings, model: e.target.value });
+                            }}
+                            className="w-full bg-background border border-primary/20 rounded-xl p-3 text-sm focus:border-accent outline-none"
+                          >
+                            {POPULAR_FREE_MODELS.map(model => (
+                              <option key={model.id} value={model.id}>{model.name}</option>
+                            ))}
+                            <option value="custom">-- Custom Model ID --</option>
+                          </select>
+                          {(aiSettings.model === "custom" || !POPULAR_FREE_MODELS.some(m => m.id === aiSettings.model)) && (
+                            <input
+                              type="text"
+                              value={aiSettings.model === "custom" ? "" : aiSettings.model}
+                              onChange={(e) => setAiSettings({ ...aiSettings, model: e.target.value })}
+                              className="w-full bg-background border border-primary/20 rounded-xl p-3 text-sm focus:border-accent outline-none"
+                              placeholder="Enter custom model ID (e.g. google/gemma-7b-it:free)"
+                            />
+                          )}
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-foreground-muted">Top P</label>
@@ -616,6 +679,23 @@ export default function AdminPage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
+                      <div className="md:col-span-2 flex flex-col gap-2">
+                        <button
+                          onClick={handleTestConnection}
+                          disabled={testingModel}
+                          className={`w-full py-2 rounded-xl text-sm font-semibold border transition-all ${
+                            testingModel ? "bg-primary/20 border-primary/10 text-foreground-muted animate-pulse" : "bg-primary/10 border-primary/30 text-accent hover:bg-primary/20"
+                          }`}
+                        >
+                          {testingModel ? "Testing Connection..." : "Test Model Connection"}
+                        </button>
+                        {testResult && (
+                          <div className={`p-3 rounded-xl text-xs border ${testResult.ok ? "bg-green-500/10 border-green-500/30 text-green-400" : "bg-red-500/10 border-red-500/30 text-red-400"}`}>
+                            {testResult.message}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-foreground-muted">Context Messages</label>
                         <input
