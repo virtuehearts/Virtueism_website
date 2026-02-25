@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import VideoSlideshow from "@/components/VideoSlideshow";
 import CertificateLookup from "@/components/CertificateLookup";
+import Header from "@/components/Header";
 
 const trainingDays = [
   "Day 1: Introduction to Reiki energy and spiritual grounding",
@@ -74,38 +75,14 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0d0720] text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
         <div className="hero-orb hero-orb-one" />
         <div className="hero-orb hero-orb-two" />
         <div className="hero-orb hero-orb-three" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-violet-500/20 bg-[#0d0720]/90 backdrop-blur">
-        <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-500">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            <span className="text-lg">Virtueism.org</span>
-          </Link>
-
-          <div className="hidden items-center gap-6 text-sm text-violet-100 md:flex">
-            <a href="#training" className="hover:text-violet-300">Training</a>
-            <a href="#services" className="hover:text-violet-300">Services</a>
-            <a href="#gallery" className="hover:text-violet-300">Gallery</a>
-            <a href="#membership" className="hover:text-violet-300">Membership</a>
-            <a href="#contact" className="hover:text-violet-300">Contact</a>
-          </div>
-
-          <Link
-            href="/register"
-            className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 px-4 py-2 text-sm font-medium hover:opacity-90"
-          >
-            Start Training
-          </Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className="relative z-10">
         <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 lg:grid-cols-2 lg:py-24">
@@ -117,7 +94,7 @@ export default function HomePage() {
             <h1 className="mb-5 text-4xl font-bold leading-tight md:text-6xl">
               A Modern Home for Reiki Healing, Meditation, and Spiritual Growth
             </h1>
-            <p className="mb-8 max-w-xl text-lg text-violet-100/80">
+            <p className="mb-8 max-w-xl text-lg text-foreground/80">
               Discover an immersive, peaceful space for healing sessions, guided training,
               and conscious community. Begin your free 7-day Reiki path and continue with
               mentorship, teachings, and Mya AI guidance.
@@ -125,14 +102,14 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 px-6 py-3 font-medium"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 px-6 py-3 font-medium text-white"
               >
                 <CalendarCheck className="h-5 w-5" />
                 Join Free 7-Day Training
               </Link>
               <Link
                 href="/login"
-                className="rounded-full border border-violet-400/40 px-6 py-3 text-violet-100 hover:bg-violet-500/10"
+                className="rounded-full border border-violet-400/40 px-6 py-3 text-foreground hover:bg-violet-500/10"
               >
                 Returning Student
               </Link>
@@ -141,7 +118,7 @@ export default function HomePage() {
 
           <div className="glass-panel rounded-2xl border border-violet-500/30 p-6">
             <h2 className="mb-5 text-2xl font-semibold">Why People Join Virtueism</h2>
-            <ul className="space-y-3 text-violet-100/80">
+            <ul className="space-y-3 text-foreground/80">
               {[
                 "Authentic Reiki training guided by Baba Virtuehearts",
                 "Beginner-friendly steps with practical daily rituals",
@@ -168,7 +145,7 @@ export default function HomePage() {
                 Healing Gallery Slideshow
               </span>
               <h2 className="mb-4 text-3xl font-bold md:text-4xl">A Captivating Look Into Sessions</h2>
-              <div className="space-y-4 max-w-xl text-violet-100/80 leading-relaxed">
+              <div className="space-y-4 max-w-xl text-foreground/80 leading-relaxed">
                 <p>
                   This is a preview of the sessions, the healing energy and your aura, and mind, how it will expand and change, with the knowledge of Virtueism Reiki, once you receive your training you will be able to get a certificate and practice these sessions yourself.
                 </p>
@@ -192,14 +169,14 @@ export default function HomePage() {
         </section>
 
         <section id="training" className="mx-auto w-full max-w-6xl px-4 py-14">
-          <h2 className="mb-2 text-3xl font-bold md:text-4xl">Free 7-Day Reiki Training</h2>
-          <p className="mb-8 max-w-3xl text-violet-100/80">
+          <h2 className="mb-2 text-3xl font-bold md:text-4xl text-foreground">Free 7-Day Reiki Training</h2>
+          <p className="mb-8 max-w-3xl text-foreground/80">
             Build a strong spiritual foundation through seven guided days. After signup,
             students can continue through daily lessons, quiz checkpoints, and personal progress tracking.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             {trainingDays.map((day) => (
-              <div key={day} className="glass-panel rounded-xl border border-violet-500/20 p-4 text-violet-100/90">
+              <div key={day} className="glass-panel rounded-xl border border-violet-500/20 p-4 text-foreground/90">
                 {day}
               </div>
             ))}
@@ -207,13 +184,13 @@ export default function HomePage() {
         </section>
 
         <section id="services" className="mx-auto w-full max-w-6xl px-4 py-14">
-          <h2 className="mb-8 text-3xl font-bold md:text-4xl">Wellness Services</h2>
+          <h2 className="mb-8 text-3xl font-bold md:text-4xl text-foreground">Wellness Services</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {services.map((service) => (
               <article key={service.title} className="glass-panel rounded-xl border border-violet-500/20 p-6 flex flex-col justify-between">
                 <div>
-                  <h3 className="mb-2 text-xl font-semibold">{service.title}</h3>
-                  <p className="text-violet-100/80 text-sm">{service.description}</p>
+                  <h3 className="mb-2 text-xl font-semibold text-foreground">{service.title}</h3>
+                  <p className="text-foreground/70 text-sm">{service.description}</p>
                 </div>
                 <Link href={service.href} className="mt-4 inline-block text-sm text-violet-200 underline underline-offset-4 hover:text-violet-100">
                   More info
@@ -227,8 +204,8 @@ export default function HomePage() {
           <div className="glass-panel rounded-3xl border border-accent/30 p-8 md:p-16 text-center space-y-8 bg-gradient-to-b from-accent/5 to-transparent">
             <div className="space-y-4">
               <Award className="mx-auto text-accent" size={48} />
-              <h2 className="text-3xl md:text-4xl font-bold">Verify a Practitioner</h2>
-              <p className="max-w-2xl mx-auto text-violet-100/70">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground">Verify a Practitioner</h2>
+              <p className="max-w-2xl mx-auto text-foreground/70">
                 Official Virtueism Reiki certificates include the contact info of the practitioner
                 who has completed the Master level with Baba Virtuehearts. Enter a certificate number below to verify their status.
               </p>
@@ -238,24 +215,24 @@ export default function HomePage() {
         </section>
 
         <section id="membership" className="mx-auto w-full max-w-6xl px-4 py-14">
-          <h2 className="mb-8 text-3xl font-bold md:text-4xl">Membership & Community</h2>
+          <h2 className="mb-8 text-3xl font-bold md:text-4xl text-foreground">Membership & Community</h2>
           <div className="glass-panel rounded-2xl border border-violet-500/25 p-8">
             <ul className="grid gap-4 md:grid-cols-2">
               {membershipPerks.map((perk) => (
-                <li key={perk} className="flex items-start gap-3 text-violet-100/90">
+                <li key={perk} className="flex items-start gap-3 text-foreground/90">
                   <Waves className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
                   {perk}
                 </li>
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/mya-chat" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10">
+              <Link href="/mya-chat" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10 text-foreground">
                 Open Mya Chat
               </Link>
-              <Link href="/teachings" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10">
+              <Link href="/teachings" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10 text-foreground">
                 View Teachings
               </Link>
-              <Link href="/dashboard" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10">
+              <Link href="/dashboard" className="rounded-full border border-violet-400/40 px-5 py-2 hover:bg-violet-500/10 text-foreground">
                 Student Dashboard
               </Link>
             </div>
@@ -263,17 +240,17 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer id="contact" className="mx-auto w-full max-w-6xl border-t border-violet-500/20 px-4 py-10 text-sm text-violet-100/70">
+      <footer id="contact" className="mx-auto w-full max-w-6xl border-t border-violet-500/20 px-4 py-10 text-sm text-foreground/70">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="font-medium text-violet-100">Virtueism.org / Virtueism Institute of Wellness</p>
+            <p className="font-medium text-foreground">Virtueism.org / Virtueism Institute of Wellness</p>
             <p>Contact: admin@virtueism.org</p>
           </div>
           <div className="space-y-1 text-right">
-            <p className="flex items-center justify-end gap-2">
+            <p className="flex items-center justify-end gap-2 text-foreground/80">
               <MapPin className="h-4 w-4" /> Toronto Canada (GTA Area organization)
             </p>
-            <p className="flex items-center justify-end gap-2">
+            <p className="flex items-center justify-end gap-2 text-foreground/80">
               <MessageCircle className="h-4 w-4" /> Remote sessions available (Worldwide)
             </p>
           </div>

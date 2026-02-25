@@ -13,10 +13,16 @@ export default function MyaChatPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="p-6 border-b border-primary/10 bg-background-alt/50 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between">
-        <Link href={backHref} className="flex items-center gap-2 text-foreground-muted hover:text-accent transition-colors">
-          <ChevronLeft size={20} />
-          <span>{backLabel}</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href={backHref} className="flex items-center gap-2 text-foreground-muted hover:text-accent transition-colors">
+            <ChevronLeft size={20} />
+            <span>{backLabel}</span>
+          </Link>
+          <span className="text-primary/20">|</span>
+          <Link href="/" className="text-sm text-foreground-muted hover:text-accent transition-colors">
+            Home
+          </Link>
+        </div>
         <h1 className="text-2xl font-serif text-accent">Mya – Reiki Assistant</h1>
         <div className="w-24" />
       </header>
