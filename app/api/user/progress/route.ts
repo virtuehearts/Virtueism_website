@@ -27,6 +27,7 @@ export async function GET() {
 
     return NextResponse.json({
       hasIntake: !!user.intake,
+      isReikiMaster: user.isReikiMaster,
       completedDays: user.progress.filter(p => p.completed).map(p => p.day),
       completedProgress: user.progress
         .filter((p) => p.completed)

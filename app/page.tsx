@@ -10,8 +10,10 @@ import {
   MessageCircle,
   Sparkles,
   Waves,
+  Award,
 } from "lucide-react";
 import VideoSlideshow from "@/components/VideoSlideshow";
+import CertificateLookup from "@/components/CertificateLookup";
 
 const trainingDays = [
   "Day 1: Introduction to Reiki energy and spiritual grounding",
@@ -218,6 +220,20 @@ export default function HomePage() {
                 </Link>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="verification" className="mx-auto w-full max-w-6xl px-4 py-14 border-t border-violet-500/10">
+          <div className="glass-panel rounded-3xl border border-accent/30 p-8 md:p-16 text-center space-y-8 bg-gradient-to-b from-accent/5 to-transparent">
+            <div className="space-y-4">
+              <Award className="mx-auto text-accent" size={48} />
+              <h2 className="text-3xl md:text-4xl font-bold">Verify a Practitioner</h2>
+              <p className="max-w-2xl mx-auto text-violet-100/70">
+                Official Virtueism Reiki certificates include the contact info of the practitioner
+                who has completed the Master level with Baba Virtuehearts. Enter a certificate number below to verify their status.
+              </p>
+            </div>
+            <CertificateLookup />
           </div>
         </section>
 

@@ -10,6 +10,12 @@ export const users = sqliteTable('user', {
   image: text('image'),
   role: text('role').default('USER').notNull(),
   status: text('status').default('PENDING').notNull(),
+  isReikiMaster: integer('isReikiMaster', { mode: 'boolean' }).default(false).notNull(),
+  certificateNumber: text('certificateNumber').unique(),
+  certificateDate: integer('certificateDate', { mode: 'timestamp' }),
+  website: text('website'),
+  whatsapp: text('whatsapp'),
+  bio: text('bio'),
   createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
   updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
 });

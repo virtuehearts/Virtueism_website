@@ -8,7 +8,7 @@ import ProgressIndicator from "@/components/ProgressIndicator";
 import DailyCard from "@/components/DailyCard";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, Library } from "lucide-react";
+import { MessageCircle, Library, Award, Globe, Phone, FileText, Check, Loader2 } from "lucide-react";
 import MessageBaba from "@/components/MessageBaba";
 
 type CompletedProgressEntry = {
@@ -29,6 +29,9 @@ export default function DashboardPage() {
   const [completedProgress, setCompletedProgress] = useState<CompletedProgressEntry[]>([]);
   const [lessonLockMessage, setLessonLockMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isReikiMaster, setIsReikiMaster] = useState(false);
+  const [practitionerInfo, setPractitionerInfo] = useState({ website: "", whatsapp: "", bio: "", certificateNumber: "", certificateDate: "" });
+  const [savingPractitioner, setSavingPractitioner] = useState(false);
 
   const handleSignOut = async () => {
     await logoutToLogin();
@@ -61,12 +64,54 @@ export default function DashboardPage() {
     }
   }, [session, status, router]);
 
+  useEffect(() => {
+    if (isReikiMaster) {
+      fetchPractitionerInfo();
+    }
+  }, [isReikiMaster]);
+
+  const fetchPractitionerInfo = async () => {
+    try {
+      const res = await fetch("/api/user/practitioner-info");
+      if (res.ok) {
+        const data = await res.json();
+        setPractitionerInfo(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch practitioner info");
+    }
+  };
+
+  const handlePractitionerUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingPractitioner(true);
+    try {
+      const res = await fetch("/api/user/practitioner-info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          website: practitionerInfo.website,
+          whatsapp: practitionerInfo.whatsapp,
+          bio: practitionerInfo.bio,
+        }),
+      });
+      if (res.ok) {
+        alert("Practitioner profile updated successfully!");
+      }
+    } catch (err) {
+      alert("Failed to update profile");
+    } finally {
+      setSavingPractitioner(false);
+    }
+  };
+
   const fetchProgress = async () => {
     try {
       const res = await fetch("/api/user/progress");
       if (res.ok) {
         const data = await res.json();
         setHasIntake(data.hasIntake);
+        setIsReikiMaster(data.isReikiMaster || false);
         setProgress(data.completedDays || []);
         setCompletedProgress(data.completedProgress || []);
         // Set current day to the first incomplete day
@@ -147,6 +192,81 @@ export default function DashboardPage() {
         {!completedAllLessons && <ProgressIndicator currentDay={currentDay} completedDays={progress} />}
 
         <div className="grid grid-cols-1 gap-12 pt-8">
+          {isReikiMaster && (
+            <div className="mx-auto w-full max-w-4xl rounded-3xl border border-accent/40 bg-accent/5 p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-accent/20 p-3 rounded-2xl">
+                    <Award className="text-accent" size={32} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-serif text-foreground">Reiki Master Practitioner</h3>
+                    <p className="text-sm text-foreground-muted">Verified by Baba Virtuehearts • Cert: {practitionerInfo.certificateNumber}</p>
+                  </div>
+                </div>
+                <Link
+                  href={`/certificates/${practitionerInfo.certificateNumber}`}
+                  className="flex items-center gap-2 rounded-full border border-accent/40 px-6 py-2 text-sm font-medium text-accent hover:bg-accent/10 transition-all"
+                >
+                  <FileText size={18} />
+                  <span>View & Print Certificate</span>
+                </Link>
+              </div>
+
+              <form onSubmit={handlePractitionerUpdate} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground-muted flex items-center gap-2">
+                      <Globe size={14} /> Website / Social Media Link
+                    </label>
+                    <input
+                      type="url"
+                      value={practitionerInfo.website}
+                      onChange={(e) => setPractitionerInfo({ ...practitionerInfo, website: e.target.value })}
+                      placeholder="https://yourwebsite.com"
+                      className="w-full bg-background border border-primary/20 rounded-xl px-4 py-2 text-sm focus:border-accent outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground-muted flex items-center gap-2">
+                      <Phone size={14} /> WhatsApp Number
+                    </label>
+                    <input
+                      type="text"
+                      value={practitionerInfo.whatsapp}
+                      onChange={(e) => setPractitionerInfo({ ...practitionerInfo, whatsapp: e.target.value })}
+                      placeholder="+1 123 456 7890"
+                      className="w-full bg-background border border-primary/20 rounded-xl px-4 py-2 text-sm focus:border-accent outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground-muted">Practitioner Bio / Services</label>
+                  <textarea
+                    value={practitionerInfo.bio}
+                    onChange={(e) => setPractitionerInfo({ ...practitionerInfo, bio: e.target.value })}
+                    placeholder="Tell your clients about your practice..."
+                    rows={4}
+                    className="w-full bg-background border border-primary/20 rounded-xl px-4 py-2 text-sm focus:border-accent outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingPractitioner}
+                  className="w-full bg-accent text-background font-bold py-3 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {savingPractitioner ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <>
+                      <Check size={20} />
+                      Save Practitioner Profile
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
           {completedAllLessons && (
             <div className="mx-auto w-full max-w-4xl rounded-3xl border border-accent/40 bg-primary/10 p-8 text-center space-y-4">
               <p className="text-xs uppercase tracking-[0.3em] text-accent">New Large Lesson Unlocked</p>

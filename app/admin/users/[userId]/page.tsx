@@ -78,8 +78,24 @@ export default async function AdminUserDetailsPage({ params }: { params: Promise
             <p><span className="text-accent/70">Location:</span> {user.intake?.location || "Not provided"}</p>
             <p><span className="text-accent/70">Gender:</span> {user.intake?.gender || "Not provided"}</p>
             <p><span className="text-accent/70">Experience:</span> {user.intake?.experience || "Not provided"}</p>
+            {user.isReikiMaster && (
+              <>
+                <p><span className="text-accent font-bold">Reiki Master:</span> Yes</p>
+                <p><span className="text-accent/70">Cert #:</span> {user.certificateNumber}</p>
+              </>
+            )}
           </div>
         </section>
+
+        {user.isReikiMaster && (
+          <section className="bg-background-alt rounded-2xl border border-accent/30 p-6 space-y-3 text-sm">
+            <h3 className="text-lg font-semibold text-accent">Practitioner Profile</h3>
+            <p><span className="text-accent/70">Website:</span> {user.website || "Not provided"}</p>
+            <p><span className="text-accent/70">WhatsApp:</span> {user.whatsapp || "Not provided"}</p>
+            <p><span className="text-accent/70">Bio:</span> {user.bio || "Not provided"}</p>
+            <p><span className="text-accent/70">Certificate Date:</span> {formatDate(user.certificateDate)}</p>
+          </section>
+        )}
 
         <section className="bg-background-alt rounded-2xl border border-primary/20 p-6 space-y-3 text-sm">
           <h3 className="text-lg font-semibold text-accent">Intake Notes</h3>
