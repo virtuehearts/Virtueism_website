@@ -266,15 +266,15 @@ export default function HomePage() {
       <footer id="contact" className="mx-auto w-full max-w-6xl border-t border-violet-500/20 px-4 py-10 text-sm text-violet-100/70">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="font-medium text-violet-100">Virtueism.org + ReikiTraining</p>
-            <p>Contact: 647-781-8371</p>
+            <p className="font-medium text-violet-100">Virtueism.org / Virtueism Institute of Wellness</p>
+            <p>Contact: admin@virtueism.org</p>
           </div>
           <div className="space-y-1 text-right">
             <p className="flex items-center justify-end gap-2">
-              <MapPin className="h-4 w-4" /> Scarborough, Ontario (GTA Outcall Available)
+              <MapPin className="h-4 w-4" /> Toronto Canada (GTA Area organization)
             </p>
             <p className="flex items-center justify-end gap-2">
-              <MessageCircle className="h-4 w-4" /> WhatsApp support available
+              <MessageCircle className="h-4 w-4" /> Remote sessions available (Worldwide)
             </p>
           </div>
         </div>

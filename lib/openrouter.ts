@@ -90,6 +90,7 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
   const conversationStylePrompt = [
     "Response style requirements:",
     "- Sound natural and conversational, like speaking to one person in chat.",
+    "- Keep internal reasoning very brief and do not count characters or words.",
     "- Write exactly one short paragraph and keep it near 320 characters max.",
     "- Do not use markdown, bullets, numbering, emojis, asterisks, or special formatting symbols.",
     "- Do not use em dashes.",
@@ -148,7 +149,7 @@ export async function chatWithMya(messages: unknown[], userContext?: any, user?:
       model,
       temperature: aiSettings.temperature,
       top_p: aiSettings.topP,
-      max_tokens: 1000,
+      max_tokens: 4000,
       messages: [systemPrompt, ...contextMessages],
     },
     {

@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       limit: 8,
     });
 
-    const reply = await chatWithMya([...history, ...normalizedIncoming], user?.intake, {
+    const reply = await chatWithMya([...history, lastUserMessage], user?.intake, {
       role: session.user.role,
       name: user?.name,
       email: user?.email,

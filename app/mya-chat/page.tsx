@@ -32,7 +32,7 @@ export default function MyaChatPage() {
         <ChatInterface />
       </main>
 
-      <footer className="p-8 text-center text-foreground-muted/40 text-sm">Blessings of peace, Baba Virtuehearts | 647-781-8371</footer>
+      <footer className="p-8 text-center text-foreground-muted/40 text-sm">Blessings of peace, Baba Virtuehearts | admin@virtueism.org</footer>
     </div>
   );
 }
