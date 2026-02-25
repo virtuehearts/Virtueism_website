@@ -171,12 +171,19 @@ function LoginContent() {
 
           <div className="text-center space-y-4">
             {!isAdminLogin ? (
-              <p className="text-foreground-muted">
-                New to the training?{" "}
-                <Link href="/register" className="text-accent hover:text-accent-light transition-colors">
-                  Join Now
-                </Link>
-              </p>
+              <>
+                <p className="text-foreground-muted">
+                  New to the training?{" "}
+                  <Link href="/register" className="text-accent hover:text-accent-light transition-colors">
+                    Join Now
+                  </Link>
+                </p>
+                <div className="pt-2">
+                  <Link href="/" className="text-sm text-foreground-muted hover:text-accent transition-colors">
+                    ← Back to Home
+                  </Link>
+                </div>
+              </>
             ) : (
               <Link href="/" className="text-sm text-foreground-muted hover:text-accent transition-colors">
                 ← Return to Temple

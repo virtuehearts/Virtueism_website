@@ -127,13 +127,18 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 space-y-4">
           <p className="text-foreground-muted">
             Already have an account?{" "}
             <Link href="/login" className="text-accent hover:text-accent-light transition-colors">
               Sign In
             </Link>
           </p>
+          <div className="pt-2">
+            <Link href="/" className="text-sm text-foreground-muted hover:text-accent transition-colors">
+              ← Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     </div>
