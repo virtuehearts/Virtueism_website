@@ -111,7 +111,7 @@ export default function TeachingsPage() {
       </main>
 
       <footer className="p-8 text-center text-foreground-muted/40 text-sm border-t border-primary/10">
-        Blessings of peace, Baba Virtuehearts | 647-781-8371
+        Blessings of peace, Baba Virtuehearts | admin@virtueism.org
       </footer>
     </div>
   );

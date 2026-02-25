@@ -60,7 +60,9 @@ export default function ServicePage({ slug }: ServicePageProps) {
             For booking information and scheduling, please contact us directly:
           </p>
           <div className="rounded-xl bg-violet-500/10 border border-violet-500/20 p-4">
-            <p className="text-lg font-medium text-violet-100">Email: admin@virtueism.org</p>
+            <p className="text-lg font-medium text-violet-100">
+              Email: <a href={`mailto:admin@virtuehearts.org?subject=Re: Interested in your ${service.title} sessions, send me info.`} className="underline hover:text-violet-300">admin@virtuehearts.org</a>
+            </p>
             <p className="text-violet-200/70 mt-1">Our team will get back to you within 24 hours to coordinate your session.</p>
           </div>
         </section>

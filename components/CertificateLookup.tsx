@@ -18,7 +18,7 @@ export default function CertificateLookup() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleLookup} className="relative group">
         <input
           type="text"
