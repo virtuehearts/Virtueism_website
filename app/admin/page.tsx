@@ -20,6 +20,7 @@ import {
   Sparkles,
   Eye,
   ClipboardList,
+  Award,
 } from "lucide-react";
 
 interface User {
@@ -28,6 +29,8 @@ interface User {
   email: string;
   status: string;
   role: string;
+  isReikiMaster?: boolean;
+  certificateNumber?: string | null;
   image?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -212,6 +215,23 @@ export default function AdminPage() {
       }
     } catch {
       alert("Failed to update status");
+    }
+  };
+
+  const handleMasterStatusToggle = async (userId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch("/api/admin/users/master-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, isReikiMaster: !currentStatus }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isReikiMaster: data.user.isReikiMaster, certificateNumber: data.user.certificateNumber } : u)));
+      }
+    } catch {
+      alert("Failed to update master status");
     }
   };
 
@@ -412,8 +432,8 @@ export default function AdminPage() {
                       <th className="p-4 text-accent font-semibold">Name</th>
                       <th className="p-4 text-accent font-semibold">Email</th>
                       <th className="p-4 text-accent font-semibold">Status</th>
+                      <th className="p-4 text-accent font-semibold">Master</th>
                       <th className="p-4 text-accent font-semibold">Registered</th>
-                      <th className="p-4 text-accent font-semibold">Last Login</th>
                       <th className="p-4 text-accent font-semibold">Usage</th>
                       <th className="p-4 text-accent font-semibold">Actions</th>
                     </tr>
@@ -438,8 +458,19 @@ export default function AdminPage() {
                             {user.status}
                           </span>
                         </td>
+                        <td className="p-4">
+                          {user.isReikiMaster ? (
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-accent flex items-center gap-1">
+                                <Award size={12} /> MASTER
+                              </span>
+                              <span className="text-[10px] text-foreground-muted">{user.certificateNumber}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-foreground-muted italic">Student</span>
+                          )}
+                        </td>
                         <td className="p-4 text-sm text-foreground-muted">{formatDate(user.createdAt)}</td>
-                        <td className="p-4 text-sm text-foreground-muted">{formatDate(user.updatedAt)}</td>
                         <td className="p-4">
                           <div className="flex flex-col gap-1">
                             <span className="text-xs text-foreground-muted">{user.todayRequestCount || 0} requests today</span>
@@ -465,6 +496,13 @@ export default function AdminPage() {
                               <XCircle size={18} />
                             </button>
                           )}
+                          <button
+                            onClick={() => handleMasterStatusToggle(user.id, !!user.isReikiMaster)}
+                            className={`p-2 rounded-lg transition-colors ${user.isReikiMaster ? "bg-accent text-background hover:bg-accent-light" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
+                            title={user.isReikiMaster ? "Remove Master status" : "Promote to Reiki Master"}
+                          >
+                            <Award size={18} />
+                          </button>
                           <a
                             href={`/admin/users/${user.id}`}
                             className="inline-flex bg-accent hover:bg-accent-light text-white p-2 rounded-lg transition-colors"
