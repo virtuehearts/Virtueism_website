@@ -25,6 +25,24 @@ function getClientIp(req: Request) {
   return realIp?.trim() || null;
 }
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const intake = await db.query.intakes.findFirst({
+      where: eq(intakes.userId, session.user.id),
+    });
+
+    return NextResponse.json(intake || null);
+  } catch (error) {
+    console.error("Intake fetch error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
