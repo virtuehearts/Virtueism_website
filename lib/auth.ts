@@ -138,6 +138,12 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // First-time sign-in: populate token directly from the user object returned by authorize()
+        token.id = user.id;
+        token.role = user.role;
+        token.status = user.status;
+        token.email = user.email;
+
         // On first sign-in, ensure we don't carry over any large base64 images into the JWT.
         // Browsers have a 4KB limit for cookies, and base64 images easily exceed this.
         if (typeof token.picture === 'string' && token.picture.startsWith('data:image/')) {
@@ -147,16 +153,16 @@ export const authOptions: NextAuthOptions = {
         if (typeof token.image === 'string' && token.image.startsWith('data:image/')) {
           delete token.image;
         }
+
+        console.log(`[Auth] JWT callback: Initial population for ${token.email} (Role: ${token.role})`);
       }
 
-      const emailSource = user?.email || token.email;
-      if (emailSource) {
-        const email = emailSource.trim().toLowerCase();
-        if (user?.email) {
-          console.log(`[Auth] JWT callback: first-time population for ${email}`);
-        }
-
+      // Only query the DB if essential fields are missing.
+      // This prevents redundant lookups and makes the session more resilient to temporary DB issues.
+      if (token.email && (!token.id || !token.role || !token.status)) {
+        const email = (token.email as string).trim().toLowerCase();
         try {
+          console.log(`[Auth] JWT callback: Missing fields, fetching from DB for ${email}`);
           const [dbUser] = await db.select().from(users).where(eq(users.email, email)).limit(1);
           if (dbUser) {
             token.email = dbUser.email;
@@ -165,9 +171,6 @@ export const authOptions: NextAuthOptions = {
             token.status = dbUser.status;
           } else {
             console.warn(`[Auth] JWT callback: User ${email} not found in DB!`);
-            delete token.id;
-            delete token.role;
-            delete token.status;
           }
         } catch (error) {
           console.error(`[Auth] JWT callback error for ${email}:`, error);

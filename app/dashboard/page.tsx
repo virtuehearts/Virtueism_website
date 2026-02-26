@@ -41,6 +41,7 @@ export default function DashboardPage() {
   });
   const [practitionerInfo, setPractitionerInfo] = useState({ website: "", whatsapp: "", bio: "", certificateNumber: "", certificateDate: "" });
   const [savingPractitioner, setSavingPractitioner] = useState(false);
+  const [intakeData, setIntakeData] = useState<any>(null);
 
   const handleSignOut = async () => {
     await logoutToLogin();
@@ -117,6 +118,13 @@ export default function DashboardPage() {
   const fetchProgress = async () => {
     try {
       const res = await fetch("/api/user/progress");
+
+      const intakeRes = await fetch("/api/intake");
+      if (intakeRes.ok) {
+        const data = await intakeRes.json();
+        setIntakeData(data);
+      }
+
       if (res.ok) {
         const data = await res.json();
         setHasIntake(data.hasIntake);
@@ -210,6 +218,54 @@ export default function DashboardPage() {
         {!completedAllLessons && <ProgressIndicator currentDay={currentDay} completedDays={progress} />}
 
         <div className="grid grid-cols-1 gap-12 pt-8">
+          {intakeData && (
+            <div className="mx-auto w-full max-w-4xl rounded-3xl border border-primary/20 bg-background-alt/50 p-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center gap-4 border-b border-primary/10 pb-6">
+                <div className="bg-accent/10 p-4 rounded-2xl">
+                  <Award className="text-accent" size={32} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-serif text-foreground">Your Sacred Profile</h3>
+                  <p className="text-sm text-foreground-muted">Verified Details from your Intake</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8 text-left">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Full Name</p>
+                    <p className="text-lg font-medium">{intakeData.firstName} {intakeData.lastName}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Contact</p>
+                    <p className="text-lg">{intakeData.email}</p>
+                    <p className="text-sm text-foreground-muted">{intakeData.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Location</p>
+                    <p className="text-lg">{intakeData.location || "Earth"}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Primary Goal</p>
+                    <p className="text-foreground italic">&quot;{intakeData.goal}&quot;</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Reiki Experience</p>
+                    <p className="text-lg">{intakeData.experience}</p>
+                  </div>
+                  {intakeData.whyJoined && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-accent font-bold mb-1">Inspiration</p>
+                      <p className="text-sm text-foreground-muted line-clamp-2">{intakeData.whyJoined}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {completedAllLessons && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="text-center">
