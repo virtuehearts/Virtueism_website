@@ -28,6 +28,13 @@ export async function GET() {
     return NextResponse.json({
       hasIntake: !!user.intake,
       isReikiMaster: user.isReikiMaster,
+      certificateNumber: user.certificateNumber,
+      isReikiLevel1: user.isReikiLevel1,
+      certificateNumberLevel1: user.certificateNumberLevel1,
+      isReikiLevel2: user.isReikiLevel2,
+      certificateNumberLevel2: user.certificateNumberLevel2,
+      isAllureReiki: user.isAllureReiki,
+      certificateNumberAllure: user.certificateNumberAllure,
       completedDays: user.progress.filter(p => p.completed).map(p => p.day),
       completedProgress: user.progress
         .filter((p) => p.completed)

@@ -74,16 +74,22 @@ export default async function AdminUserDetailsPage({ params }: { params: Promise
           <div className="grid md:grid-cols-2 gap-3 text-sm">
             <p><span className="text-accent/70">Status:</span> {user.status}</p>
             <p><span className="text-accent/70">Role:</span> {user.role}</p>
+            <p><span className="text-accent/70">First Name:</span> {user.intake?.firstName || "Not provided"}</p>
+            <p><span className="text-accent/70">Last Name:</span> {user.intake?.lastName || "Not provided"}</p>
+            <p><span className="text-accent/70">Phone:</span> {user.intake?.phone || "Not provided"}</p>
+            <p><span className="text-accent/70">Intake Email:</span> {user.intake?.email || "Not provided"}</p>
             <p><span className="text-accent/70">Age:</span> {user.intake?.age ?? "Not provided"}</p>
             <p><span className="text-accent/70">Location:</span> {user.intake?.location || "Not provided"}</p>
             <p><span className="text-accent/70">Gender:</span> {user.intake?.gender || "Not provided"}</p>
             <p><span className="text-accent/70">Experience:</span> {user.intake?.experience || "Not provided"}</p>
-            {user.isReikiMaster && (
-              <>
-                <p><span className="text-accent font-bold">Reiki Master:</span> Yes</p>
-                <p><span className="text-accent/70">Cert #:</span> {user.certificateNumber}</p>
-              </>
-            )}
+          </div>
+
+          <div className="pt-4 border-t border-primary/10 grid md:grid-cols-2 gap-3 text-sm">
+            <h3 className="col-span-2 font-semibold text-accent">Certifications</h3>
+            <p><span className="text-accent/70">Level 1:</span> {user.isReikiLevel1 ? `Yes (${user.certificateNumberLevel1})` : "No"}</p>
+            <p><span className="text-accent/70">Level 2:</span> {user.isReikiLevel2 ? `Yes (${user.certificateNumberLevel2})` : "No"}</p>
+            <p><span className="text-accent/70">Master:</span> {user.isReikiMaster ? `Yes (${user.certificateNumber})` : "No"}</p>
+            <p><span className="text-accent/70">Allure:</span> {user.isAllureReiki ? `Yes (${user.certificateNumberAllure})` : "No"}</p>
           </div>
         </section>
 

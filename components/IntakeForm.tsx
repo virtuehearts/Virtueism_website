@@ -10,6 +10,10 @@ interface IntakeFormProps {
 
 export default function IntakeForm({ onComplete, initialData }: IntakeFormProps) {
   const [formData, setFormData] = useState({
+    firstName: initialData?.firstName || "",
+    lastName: initialData?.lastName || "",
+    phone: initialData?.phone || "",
+    email: initialData?.email || "",
     age: initialData?.age || "",
     location: initialData?.location || "",
     gender: initialData?.gender || "",
@@ -77,6 +81,58 @@ export default function IntakeForm({ onComplete, initialData }: IntakeFormProps)
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium text-foreground-muted mb-1">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              required
+              className="w-full px-4 py-2 rounded bg-background border border-primary/30 text-foreground focus:outline-none focus:border-accent"
+              value={formData.firstName}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-foreground-muted mb-1">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              required
+              className="w-full px-4 py-2 rounded bg-background border border-primary/30 text-foreground focus:outline-none focus:border-accent"
+              value={formData.lastName}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground-muted mb-1">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              required
+              className="w-full px-4 py-2 rounded bg-background border border-primary/30 text-foreground focus:outline-none focus:border-accent"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+          </div>
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-foreground-muted mb-1">Phone Number</label>
+            <input
+              id="phone"
+              type="tel"
+              required
+              className="w-full px-4 py-2 rounded bg-background border border-primary/30 text-foreground focus:outline-none focus:border-accent"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <p className="text-[10px] text-foreground-muted italic mt-[-1rem] mb-4">Used for scheduling & verification.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

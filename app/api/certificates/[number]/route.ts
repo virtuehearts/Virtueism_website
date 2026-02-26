@@ -14,25 +14,58 @@ export async function GET(
       return NextResponse.json({ error: "Certificate number is required" }, { status: 400 });
     }
 
-    const [user] = await db.select({
-      name: users.name,
-      email: users.email,
-      website: users.website,
-      whatsapp: users.whatsapp,
-      bio: users.bio,
-      certificateNumber: users.certificateNumber,
-      certificateDate: users.certificateDate,
-      isReikiMaster: users.isReikiMaster
-    })
-    .from(users)
-    .where(eq(users.certificateNumber, number))
-    .limit(1);
+    const user = await db.query.users.findFirst({
+      where: (users, { eq, or }) => or(
+        eq(users.certificateNumber, number),
+        eq(users.certificateNumberLevel1, number),
+        eq(users.certificateNumberLevel2, number),
+        eq(users.certificateNumberAllure, number)
+      ),
+      with: {
+        intake: true
+      }
+    });
 
-    if (!user || !user.isReikiMaster) {
+    if (!user) {
       return NextResponse.json({ error: "Certificate not found or invalid" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    let type = "";
+    let date = null;
+    let certNum = "";
+
+    if (user.certificateNumber === number) {
+      type = "MASTER";
+      date = user.certificateDate;
+      certNum = user.certificateNumber || "";
+    } else if (user.certificateNumberLevel1 === number) {
+      type = "LEVEL1";
+      date = user.certificateDateLevel1;
+      certNum = user.certificateNumberLevel1 || "";
+    } else if (user.certificateNumberLevel2 === number) {
+      type = "LEVEL2";
+      date = user.certificateDateLevel2;
+      certNum = user.certificateNumberLevel2 || "";
+    } else if (user.certificateNumberAllure === number) {
+      type = "ALLURE";
+      date = user.certificateDateAllure;
+      certNum = user.certificateNumberAllure || "";
+    }
+
+    const displayName = (user.intake?.firstName && user.intake?.lastName)
+      ? `${user.intake.firstName} ${user.intake.lastName}`
+      : user.name;
+
+    return NextResponse.json({
+      name: displayName,
+      email: user.email,
+      website: user.website,
+      whatsapp: user.whatsapp,
+      bio: user.bio,
+      certificateNumber: certNum,
+      certificateDate: date,
+      type
+    });
   } catch (error) {
     console.error("Certificate lookup error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
