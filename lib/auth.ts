@@ -1,5 +1,4 @@
 import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
@@ -127,10 +126,6 @@ export const authorize = async (credentials: Record<"email" | "password", string
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -141,34 +136,6 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "google" && user.email) {
-        const email = user.email.trim().toLowerCase();
-        const [existingUser] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-
-        if (!existingUser) {
-          const adminEmailEnv = normalizeEnv(process.env.ADMIN_EMAIL)?.toLowerCase();
-          const isAdmin = email === adminEmailEnv;
-          await db.insert(users).values({
-            email: email,
-            name: user.name,
-            image: user.image,
-            status: isAdmin ? "APPROVED" : "PENDING",
-            role: isAdmin ? "ADMIN" : "USER",
-            updatedAt: new Date(),
-          });
-        } else {
-          await db.update(users)
-            .set({
-              name: user.name,
-              image: user.image,
-              updatedAt: new Date(),
-            })
-            .where(eq(users.id, existingUser.id));
-        }
-      }
-      return true;
-    },
     async jwt({ token, user }) {
       if (user) {
         // On first sign-in, ensure we don't carry over any large base64 images into the JWT.

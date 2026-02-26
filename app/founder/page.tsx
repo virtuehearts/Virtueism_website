@@ -15,7 +15,7 @@ export default function FounderPage() {
 
       <main className="max-w-4xl mx-auto px-4 pb-20">
         {/* Hero Section */}
-        <section className="relative h-[400px] w-full rounded-3xl overflow-hidden mb-12 border border-violet-500/20 shadow-2xl">
+        <section className="relative h-[800px] w-full rounded-3xl overflow-hidden mb-12 border border-violet-500/20 shadow-2xl">
           <Image
             src="/founder.jpg"
             alt="Baba Virtuehearts"
