@@ -31,6 +31,12 @@ interface User {
   role: string;
   isReikiMaster?: boolean;
   certificateNumber?: string | null;
+  isReikiLevel1?: boolean;
+  certificateNumberLevel1?: string | null;
+  isReikiLevel2?: boolean;
+  certificateNumberLevel2?: string | null;
+  isAllureReiki?: boolean;
+  certificateNumberAllure?: string | null;
   image?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -218,20 +224,30 @@ export default function AdminPage() {
     }
   };
 
-  const handleMasterStatusToggle = async (userId: string, currentStatus: boolean) => {
+  const handleCertificateToggle = async (userId: string, level: string, currentStatus: boolean) => {
     try {
-      const res = await fetch("/api/admin/users/master-status", {
+      const res = await fetch("/api/admin/users/certificate-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, isReikiMaster: !currentStatus }),
+        body: JSON.stringify({ userId, level, status: !currentStatus }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isReikiMaster: data.user.isReikiMaster, certificateNumber: data.user.certificateNumber } : u)));
+        setUsers((prev) => prev.map((u) => (u.id === userId ? {
+          ...u,
+          isReikiMaster: data.user.isReikiMaster,
+          certificateNumber: data.user.certificateNumber,
+          isReikiLevel1: data.user.isReikiLevel1,
+          certificateNumberLevel1: data.user.certificateNumberLevel1,
+          isReikiLevel2: data.user.isReikiLevel2,
+          certificateNumberLevel2: data.user.certificateNumberLevel2,
+          isAllureReiki: data.user.isAllureReiki,
+          certificateNumberAllure: data.user.certificateNumberAllure,
+        } : u)));
       }
     } catch {
-      alert("Failed to update master status");
+      alert("Failed to update certificate status");
     }
   };
 
@@ -432,7 +448,7 @@ export default function AdminPage() {
                       <th className="p-4 text-accent font-semibold">Name</th>
                       <th className="p-4 text-accent font-semibold">Email</th>
                       <th className="p-4 text-accent font-semibold">Status</th>
-                      <th className="p-4 text-accent font-semibold">Master</th>
+                      <th className="p-4 text-accent font-semibold">Certifications</th>
                       <th className="p-4 text-accent font-semibold">Registered</th>
                       <th className="p-4 text-accent font-semibold">Usage</th>
                       <th className="p-4 text-accent font-semibold">Actions</th>
@@ -459,16 +475,23 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td className="p-4">
-                          {user.isReikiMaster ? (
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold text-accent flex items-center gap-1">
-                                <Award size={12} /> MASTER
-                              </span>
-                              <span className="text-[10px] text-foreground-muted">{user.certificateNumber}</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-foreground-muted italic">Student</span>
-                          )}
+                          <div className="flex flex-wrap gap-1 max-w-[150px]">
+                            {user.isReikiLevel1 && (
+                              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[8px] font-bold" title={user.certificateNumberLevel1 || ""}>L1</span>
+                            )}
+                            {user.isReikiLevel2 && (
+                              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[8px] font-bold" title={user.certificateNumberLevel2 || ""}>L2</span>
+                            )}
+                            {user.isReikiMaster && (
+                              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[8px] font-bold" title={user.certificateNumber || ""}>MASTER</span>
+                            )}
+                            {user.isAllureReiki && (
+                              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[8px] font-bold" title={user.certificateNumberAllure || ""}>ALLURE</span>
+                            )}
+                            {!user.isReikiLevel1 && !user.isReikiLevel2 && !user.isReikiMaster && !user.isAllureReiki && (
+                              <span className="text-xs text-foreground-muted italic">Student</span>
+                            )}
+                          </div>
                         </td>
                         <td className="p-4 text-sm text-foreground-muted">{formatDate(user.createdAt)}</td>
                         <td className="p-4">
@@ -496,13 +519,36 @@ export default function AdminPage() {
                               <XCircle size={18} />
                             </button>
                           )}
-                          <button
-                            onClick={() => handleMasterStatusToggle(user.id, !!user.isReikiMaster)}
-                            className={`p-2 rounded-lg transition-colors ${user.isReikiMaster ? "bg-accent text-background hover:bg-accent-light" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
-                            title={user.isReikiMaster ? "Remove Master status" : "Promote to Reiki Master"}
-                          >
-                            <Award size={18} />
-                          </button>
+                          <div className="inline-flex gap-1 bg-background/50 p-1 rounded-lg border border-primary/10">
+                            <button
+                              onClick={() => handleCertificateToggle(user.id, 'LEVEL1', !!user.isReikiLevel1)}
+                              className={`p-1.5 rounded-md text-[10px] font-bold transition-colors ${user.isReikiLevel1 ? "bg-accent text-background" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
+                              title={user.isReikiLevel1 ? "Revoke Level 1" : "Grant Level 1"}
+                            >
+                              L1
+                            </button>
+                            <button
+                              onClick={() => handleCertificateToggle(user.id, 'LEVEL2', !!user.isReikiLevel2)}
+                              className={`p-1.5 rounded-md text-[10px] font-bold transition-colors ${user.isReikiLevel2 ? "bg-accent text-background" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
+                              title={user.isReikiLevel2 ? "Revoke Level 2" : "Grant Level 2"}
+                            >
+                              L2
+                            </button>
+                            <button
+                              onClick={() => handleCertificateToggle(user.id, 'MASTER', !!user.isReikiMaster)}
+                              className={`p-1.5 rounded-md text-[10px] font-bold transition-colors ${user.isReikiMaster ? "bg-accent text-background" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
+                              title={user.isReikiMaster ? "Revoke Master" : "Grant Master"}
+                            >
+                              M
+                            </button>
+                            <button
+                              onClick={() => handleCertificateToggle(user.id, 'ALLURE', !!user.isAllureReiki)}
+                              className={`p-1.5 rounded-md text-[10px] font-bold transition-colors ${user.isAllureReiki ? "bg-accent text-background" : "bg-primary/20 text-accent hover:bg-primary/30"}`}
+                              title={user.isAllureReiki ? "Revoke Allure" : "Grant Allure"}
+                            >
+                              A
+                            </button>
+                          </div>
                           <a
                             href={`/admin/users/${user.id}`}
                             className="inline-flex bg-accent hover:bg-accent-light text-white p-2 rounded-lg transition-colors"

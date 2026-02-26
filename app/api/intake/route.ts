@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { age, location, gender, experience, goal, whyJoined, healthConcerns, photoBase64 } = await req.json();
+    const { firstName, lastName, phone, email, age, location, gender, experience, goal, whyJoined, healthConcerns, photoBase64 } = await req.json();
     const userAgent = req.headers.get("user-agent") || "";
     const browserType = detectBrowserType(userAgent);
     const ipAddress = getClientIp(req);
@@ -41,6 +41,10 @@ export async function POST(req: Request) {
     const [intake] = await db.insert(intakes)
       .values({
         userId: session.user.id,
+        firstName,
+        lastName,
+        phone,
+        email,
         age: age ? parseInt(age) : null,
         location,
         gender,
@@ -55,6 +59,10 @@ export async function POST(req: Request) {
       .onConflictDoUpdate({
         target: [intakes.userId],
         set: {
+          firstName,
+          lastName,
+          phone,
+          email,
           age: age ? parseInt(age) : null,
           location,
           gender,

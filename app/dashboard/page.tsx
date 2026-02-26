@@ -29,7 +29,16 @@ export default function DashboardPage() {
   const [completedProgress, setCompletedProgress] = useState<CompletedProgressEntry[]>([]);
   const [lessonLockMessage, setLessonLockMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isReikiMaster, setIsReikiMaster] = useState(false);
+  const [certifications, setCertifications] = useState({
+    isReikiLevel1: false,
+    certificateNumberLevel1: "",
+    isReikiLevel2: false,
+    certificateNumberLevel2: "",
+    isReikiMaster: false,
+    certificateNumber: "",
+    isAllureReiki: false,
+    certificateNumberAllure: "",
+  });
   const [practitionerInfo, setPractitionerInfo] = useState({ website: "", whatsapp: "", bio: "", certificateNumber: "", certificateDate: "" });
   const [savingPractitioner, setSavingPractitioner] = useState(false);
 
@@ -65,10 +74,10 @@ export default function DashboardPage() {
   }, [session, status, router]);
 
   useEffect(() => {
-    if (isReikiMaster) {
+    if (certifications.isReikiMaster) {
       fetchPractitionerInfo();
     }
-  }, [isReikiMaster]);
+  }, [certifications.isReikiMaster]);
 
   const fetchPractitionerInfo = async () => {
     try {
@@ -111,7 +120,16 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setHasIntake(data.hasIntake);
-        setIsReikiMaster(data.isReikiMaster || false);
+        setCertifications({
+          isReikiLevel1: data.isReikiLevel1 || false,
+          certificateNumberLevel1: data.certificateNumberLevel1 || "",
+          isReikiLevel2: data.isReikiLevel2 || false,
+          certificateNumberLevel2: data.certificateNumberLevel2 || "",
+          isReikiMaster: data.isReikiMaster || false,
+          certificateNumber: data.certificateNumber || "",
+          isAllureReiki: data.isAllureReiki || false,
+          certificateNumberAllure: data.certificateNumberAllure || "",
+        });
         setProgress(data.completedDays || []);
         setCompletedProgress(data.completedProgress || []);
         // Set current day to the first incomplete day
@@ -192,7 +210,70 @@ export default function DashboardPage() {
         {!completedAllLessons && <ProgressIndicator currentDay={currentDay} completedDays={progress} />}
 
         <div className="grid grid-cols-1 gap-12 pt-8">
-          {isReikiMaster && (
+          {completedAllLessons && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="text-center">
+                <h3 className="text-3xl font-serif text-accent">Your Certifications</h3>
+                <p className="text-foreground-muted italic">Earned through dedication and sacred practice.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { title: "Reiki Level 1", earned: certifications.isReikiLevel1, number: certifications.certificateNumberLevel1, id: "LEVEL1" },
+                  { title: "Reiki Level 2", earned: certifications.isReikiLevel2, number: certifications.certificateNumberLevel2, id: "LEVEL2" },
+                  { title: "Reiki Master", earned: certifications.isReikiMaster, number: certifications.certificateNumber, id: "MASTER" },
+                  { title: "Allure Reiki", earned: certifications.isAllureReiki, number: certifications.certificateNumberAllure, id: "ALLURE" },
+                ].map((cert) => (
+                  <div
+                    key={cert.id}
+                    onClick={() => {
+                      if (!cert.earned) {
+                        alert("To earn this certificate and book training, please email admin@virtueism.org or contact Baba Virtuehearts.");
+                      }
+                    }}
+                    className={`relative group p-6 rounded-2xl border transition-all ${
+                      cert.earned
+                        ? "bg-accent/10 border-accent/40 cursor-pointer hover:scale-[1.02]"
+                        : "bg-background-alt border-primary/10 grayscale opacity-50 cursor-help"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className={`p-4 rounded-full ${cert.earned ? "bg-accent/20 text-accent" : "bg-primary/10 text-foreground-muted"}`}>
+                        <Award size={32} />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-lg text-foreground">{cert.title}</h4>
+                        {cert.earned ? (
+                          <p className="text-[10px] text-accent font-bold mt-1 uppercase tracking-widest">Verified</p>
+                        ) : (
+                          <p className="text-[10px] text-foreground-muted mt-1 uppercase tracking-widest">Locked</p>
+                        )}
+                      </div>
+
+                      {cert.earned ? (
+                        <Link
+                          href={`/certificates/${cert.number}`}
+                          className="text-xs text-accent underline underline-offset-4 hover:text-accent-light font-medium"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View & Print Certificate
+                        </Link>
+                      ) : (
+                        <p className="text-[10px] text-foreground-muted italic">Contact Baba to earn</p>
+                      )}
+                    </div>
+                    {cert.earned && (
+                      <div className="absolute top-3 right-3">
+                        <Check className="text-green-500" size={16} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {certifications.isReikiMaster && (
             <div className="mx-auto w-full max-w-4xl rounded-3xl border border-accent/40 bg-accent/5 p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">

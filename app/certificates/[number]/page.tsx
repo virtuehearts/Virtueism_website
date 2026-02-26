@@ -13,6 +13,7 @@ interface Practitioner {
   bio: string | null;
   certificateNumber: string;
   certificateDate: string | null;
+  type: string;
 }
 
 const formatDate = (dateStr: string | null) => {
@@ -120,7 +121,10 @@ export default function CertificatePage() {
                 has successfully completed the intensive Reiki Training program and reached the level of
               </p>
               <h3 className="text-2xl md:text-4xl font-bold text-[#8b6d11] uppercase tracking-wider">
-                Reiki Master Practitioner
+                {user.type === 'LEVEL1' && "Reiki Level 1 Practitioner"}
+                {user.type === 'LEVEL2' && "Reiki Level 2 Practitioner"}
+                {user.type === 'MASTER' && "Reiki Master Practitioner"}
+                {user.type === 'ALLURE' && "Allure Reiki Practitioner"}
               </h3>
               <p className="text-lg md:text-xl">
                 guided by <span className="font-bold">Baba Virtuehearts</span>.
