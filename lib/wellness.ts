@@ -12,13 +12,15 @@ export const wellnessServices: WellnessService[] = [
   {
     slug: "reiki-sessions",
     title: "Reiki Sessions",
-    summary: "Experience healing energy in 45-60 minute sessions.",
+    summary: "Experience healing energy in 45 or 60 minute sessions.",
     details: [
       "Each session is designed to calm your nervous system and support energetic alignment.",
       "Sessions are available online or in person, based on your needs and location.",
     ],
     pricing: [
-      { label: "Session range", price: "$60 - $120" },
+      { label: "45 Minute Session", price: "$80" },
+      { label: "1 Hour Session", price: "$100" },
+      { label: "Outcall Fee", price: "$25 - $35 extra (depending on location)" },
     ],
   },
   {
@@ -47,8 +49,10 @@ export const wellnessServices: WellnessService[] = [
       "Great for tension release, circulation support, and post-stress recovery.",
     ],
     pricing: [
-      { label: "Single session", price: "$80 / hour" },
-      { label: "Package", price: "5 sessions for $350" },
+      { label: "45 Minute Session", price: "$80" },
+      { label: "1 Hour Session", price: "$100" },
+      { label: "5 Session Package", price: "$350" },
+      { label: "Outcall Fee", price: "$25 - $35 extra (depending on location)" },
     ],
   },
   {
@@ -61,7 +65,10 @@ export const wellnessServices: WellnessService[] = [
       "Sessions are focused on clearing, aligning, and balancing the energy field.",
     ],
     pricing: [
-      { label: "Standard session", price: "$90" },
+      { label: "45 Minute Session", price: "$80" },
+      { label: "1 Hour Session", price: "$100" },
+      { label: "5 Session Package", price: "$350" },
+      { label: "Outcall Fee", price: "$25 - $35 extra (depending on location)" },
     ],
   },
 ];
