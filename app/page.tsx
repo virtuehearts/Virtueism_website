@@ -121,6 +121,7 @@ export default function HomePage() {
             <ul className="space-y-3 text-foreground/80">
               {[
                 "Authentic Reiki training guided by Baba Virtuehearts",
+                "Allure(tm) Reiki Method (using Virtueism)",
                 "Beginner-friendly steps with practical daily rituals",
                 "Guided Reiki Training",
                 "Advanced Training available",
